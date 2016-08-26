@@ -46,7 +46,7 @@ Test:
 lepintegrate:
 	@if [ ! -d $(LEP_INCL_PATH_NAME) ]; then \
 	$(MKDIR) $(LEP_INCL_PATH_NAME); fi
-	cp incl/LEP/$(LEP_PATH_NAME)/*.h $(LEP_INCL_PATH_NAME)
+	$(CP) incl/LEP/$(LEP_PATH_NAME)/*.h $(LEP_INCL_PATH_NAME)
 # moves header files to <LEDA>/incl/LEP/<LEP_PATH_NAME>
 
 confclean: allclean

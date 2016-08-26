@@ -39,11 +39,11 @@
 #       OS                   COMPFLAGS          CXXLIBFLAG                SOCLIBS                 
 #                CXX                                       CXXOPTFLAG           RFLAG
 #                
-shared, Solaris, g++,  no,   ,      -fPIC,     -G,         -O,  .so,      , 	-R;
-shared, Solaris, CC,   no,   ,      -PIC,      -G,         -O,  .so,      , 	-R;
-shared, Solaris, KCC,  no,   ,      -KPIC,     -G,         +K3, .so,      , 	-R;
-shared, SunOS,   g++,  no,   ,      -fPIC,     -G,         -O,  .so,      , 	-R;
-shared, SunOS,   CC,   no,   ,      -PIC,      -G,         -O,  .so,      , 	-R;
+shared, Solaris, g++,  no,   ,      -fPIC,     -G,         -O,  .so,     -lsocket -lthread, 	-R;
+shared, Solaris, CC,   no,   ,      -PIC,      -G,         -O,  .so,     -lsocket -lthread, 	-R;
+shared, Solaris, KCC,  no,   ,      -KPIC,     -G,         +K3, .so,     -lsocket -lthread, 	-R;
+shared, SunOS,   g++,  no,   ,      -fPIC,     -G,         -O,  .so,     -lsocket -lthread, 	-R;
+shared, SunOS,   CC,   no,   ,      -PIC,      -G,         -O,  .so,     -lsocket -lthread, 	-R;
 shared, Linux,   g++,  no,   ,      -fpic,     -shared,    -O,  .so,      , 	-Xlinker -rpath -Xlinker ;
 shared, IRIX,    CC,   64,   -64 -LANG:std,   -KPIC,     -shared, -O, .so,      , 	-rpath;
 shared, IRIX,    CC,   no,   -LANG:std,       -KPIC,     -shared, -O, .so,      , 	-rpath;
@@ -53,11 +53,11 @@ shared, IRIX,    g++,  no,   ,      -fpic,     -shared,    -O,  .so,     ,      
 shared, IRIX,    g++,  64,   -mabi=64, -fpic,  -shared,    -O,  .so,     ,      -rpath;
 shared, HP-UX,   g++,  no,   ,      -fPIC,     -shared,    -O,  .sl,     ,      -R;
 shared, HP-UX,   CC,   no,   ,      +Z,        -b,         -O,  .sl,     ,      -R;
-static, Solaris, g++,  no,   ,      ,          ,           -O,  .a,      , 	-R;
-static, Solaris, CC,   no,   ,      ,          ,           -O,  .a,      , 	-R;
-static, Solaris, KCC,  no,   ,      ,          ,           +K3, .a,      , 	-R;
-static, SunOS,   g++,  no,   ,      ,          ,           -O,  .a,      , 	-R;
-static, SunOS,   CC,   no,   ,      ,          ,           -O,  .a,      , 	-R;
+static, Solaris, g++,  no,   ,      ,          ,           -O,  .a,      -lsocket -lthread, 	-R;
+static, Solaris, CC,   no,   ,      ,          ,           -O,  .a,      -lsocket -lthread, 	-R;
+static, Solaris, KCC,  no,   ,      ,          ,           +K3, .a,      -lsocket -lthread, 	-R;
+static, SunOS,   g++,  no,   ,      ,          ,           -O,  .a,      -lsocket -lthread, 	-R;
+static, SunOS,   CC,   no,   ,      ,          ,           -O,  .a,      -lsocket -lthread, 	-R;
 static, Linux,   g++,  no,   ,      ,          ,           -O,  .a,      ,      -Xlinker -rpath -Xlinker ;
 static, Cygwin,  g++,  no,   ,      ,          ,           -O,  .a,      ,      -Xlinker -rpath -Xlinker ;
 static, IRIX,    CC,   64,   -64 -LANG:std,  , ,           -O,  .a,      ,      -rpath;

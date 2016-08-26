@@ -1,4 +1,3 @@
-#line 443 "RANK_MAX_MATCHING.lw"
 //---------------------------------------------------------------------
 // File automatically generated from notangle from RANK_MAX_MATCHING.lw
 // 
@@ -26,7 +25,6 @@
 // Copyright 2004 - Dimitrios Michail
 
 
-#line 360 "RANK_MAX_MATCHING.lw"
 #ifndef LEP_RANK_MAX_MATCHING_H
 #define LEP_RANK_MAX_MATCHING_H
 
@@ -78,7 +76,6 @@ which can be as large as $n^n$. The space requirement is $O(mn + n^2)$. \\
 \precond $rank$ is positive
 }*/
 
-
 leda::array<int> BI_RANK_MAX_MATCHING_PROFILE( const leda::graph& G,
                                    const leda::edge_array<int>& rank,
                                    const leda::list<leda::edge>& matching);
@@ -97,7 +94,7 @@ a matching or not. \\
 // A procedure to check whether a list of edges is 
 // a matching, for debugging and testing purposes.
 bool RMM_DEBUG_is_valid_matching( leda::graph &G, 
-	const leda::list<leda::edge>& matching );
+        const leda::list<leda::edge>& matching );
 
 
 #endif  // LEP_RANK_MAX_MATCHING_H

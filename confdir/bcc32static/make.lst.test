@@ -1,0 +1,8 @@
+LEPNAME = rmm
+LEDALIBS = libg.lib libl.lib
+WINLIBS = 
+LEDAFLAGS = 
+PROGS = RANK_MAX_TEST.exe
+
+
+

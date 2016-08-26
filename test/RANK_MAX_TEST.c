@@ -1,8 +1,7 @@
-#line 443 "RANK_MAX_MATCHING.lw"
 //---------------------------------------------------------------------
 // File automatically generated from notangle from RANK_MAX_MATCHING.lw
 // 
-// mails and bugs: Dimitrios Michail <dimitrios.michail@gmail.com>
+// mails and bugs: Dimitrios Michail <dimitris.michail@gmail.com>
 //--------------------------------------------------------------------- 
 // 
 // This program can be freely used in an academic environment
@@ -26,7 +25,6 @@
 // Copyright 2004 - Dimitrios Michail
 
 
-#line 1296 "RANK_MAX_MATCHING.lw"
 #include <iostream>
 #include <LEP/rmm/RANK_MAX_MATCHING.h>
 
@@ -76,7 +74,7 @@ int main() {
     assert( RMM_DEBUG_is_valid_matching( G, C1 ) );
     assert( pr.size() == pr1.size() );
     for( int j = 1; j <= G.number_of_nodes(); ++j )
-    	assert( pr[j] == pr1[j] );
+        assert( pr[j] == pr1[j] );
     std::cout << " COMB:" << T1 << " MWMR:" << T2 << " (PASSED)";
 
   }

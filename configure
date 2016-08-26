@@ -520,7 +520,7 @@ fi
 
                        
                                       
-                                                                                                                       
+                                                                                                                                
 
 
 
@@ -1127,6 +1127,8 @@ OSMAJOR=`${ECHO} $OSREV|${CUT} -d"." -f1`
 
 BINFMT="${OS}"
 
+LEP_WLIBS="-lX11"
+
 if test "$OS" = SunOS ; then
 	if test "$OSMAJOR" = 5 ; then
 		OS=Solaris
@@ -1135,12 +1137,12 @@ if test "$OS" = SunOS ; then
 	else
 		OS=SunOS
 	fi
-	SOLLIBS="-lsocket -lthread"
 fi
 
 if test "$OS" = Linux -o "$OS" = "CYGWIN_NT-5.0" ; then
 	if test "$OS" = "CYGWIN_NT-5.0" ; then
 		OS=Cygwin
+		LEP_WLIBS="-luser32 -lgdi32 -lcomdlg32 -lshell32 -lwsock32"
 	fi
 
 	PROCESSOR=`${UNAME} -m`
@@ -1241,7 +1243,7 @@ fi
  
 
 echo $ac_n "checking whether to build shared libraries""... $ac_c" 1>&6
-echo "configure:1245: checking whether to build shared libraries" >&5
+echo "configure:1247: checking whether to build shared libraries" >&5
 if test "${LINKING_MODE}" != "static" -a "$OS" != Cygwin; then
   LINKING_MODE="shared"
   echo "$ac_t""yes" 1>&6
@@ -1252,7 +1254,7 @@ fi
 
 
 echo $ac_n "checking whether to enable header compatibility mode""... $ac_c" 1>&6
-echo "configure:1256: checking whether to enable header compatibility mode" >&5
+echo "configure:1258: checking whether to enable header compatibility mode" >&5
 if test "${HEADER_COMPAT}" != "yes"; then
   HEADER_COMPAT="no";
   echo "$ac_t""no" 1>&6
@@ -1280,8 +1282,6 @@ if test "${CXX_SEARCH_LIST}" = "" ; then
 fi
 
 CXX_NAME=""
-
-
 
 
 if test "${CXX}" != "" ; then
@@ -1370,7 +1370,8 @@ EOF
           if test "${IS_GXX}" = "true" ; then
     echo $ac_n "checking compiler version""... $ac_c" 1>&6
 echo "configure:1373: checking compiler version" >&5
-    CXX_VERSION=`${CXX} --version`
+
+    CXX_VERSION=`${CXX} -v 2>&1 | grep "gcc version" | ${CUT} -d' ' -f3`
     CXX_COMPILER_NAME="g++"
     VERSION_OUTPUT="g++ ${CXX_VERSION}"
     IS_EGXX=false
@@ -1390,7 +1391,7 @@ echo "configure:1373: checking compiler version" >&5
 
     elif test "${OS}" = "IRIX" ; then
                     echo $ac_n "checking compiler version""... $ac_c" 1>&6
-echo "configure:1394: checking compiler version" >&5
+echo "configure:1395: checking compiler version" >&5
     CXX_VERSION_STRING=`${CXX} -n32 -version 2>&1 | egrep ersion`
     if test "${CXX_VERSION_STRING}" = "" ; then
       
@@ -1417,7 +1418,7 @@ echo "configure:1394: checking compiler version" >&5
 
     elif test "${OS}" = "Solaris" ; then
     echo $ac_n "checking compiler version""... $ac_c" 1>&6
-echo "configure:1421: checking compiler version" >&5
+echo "configure:1422: checking compiler version" >&5
     CXX_VERSION_STRING=`${CXX} -V 2>&1 | egrep CC:`
     CXX_VERSION=`${ECHO} ${CXX_VERSION_STRING} | ${TR} -d "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ:" | ${TR} -s " " | ${CUT} -d\  -f2`
     
@@ -1446,7 +1447,7 @@ echo "configure:1421: checking compiler version" >&5
   fi
           
   echo $ac_n "checking standardized compiler name""... $ac_c" 1>&6
-echo "configure:1450: checking standardized compiler name" >&5
+echo "configure:1451: checking standardized compiler name" >&5
   if test "${CXX_VERSION_1}" != "" ; then
     _CXX_NAME="${_CXX_NAME}-${CXX_VERSION_1}"
     if test "${CXX_VERSION_2}" != "" ; then
@@ -1491,7 +1492,7 @@ else
     # Extract the first word of "${CXXCAND}", so it can be a program name with args.
 set dummy ${CXXCAND}; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:1495: checking for $ac_word" >&5
+echo "configure:1496: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_path_CXXPATH'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -1557,8 +1558,9 @@ EOF
 
           if test "${IS_GXX}" = "true" ; then
     echo $ac_n "checking compiler version""... $ac_c" 1>&6
-echo "configure:1561: checking compiler version" >&5
-    CXX_VERSION=`${CXXCAND} --version`
+echo "configure:1562: checking compiler version" >&5
+
+    CXX_VERSION=`${CXXCAND} -v 2>&1 | grep "gcc version" | ${CUT} -d' ' -f3`
     CXX_COMPILER_NAME="g++"
     VERSION_OUTPUT="g++ ${CXX_VERSION}"
     IS_EGXX=false
@@ -1578,7 +1580,7 @@ echo "configure:1561: checking compiler version" >&5
 
     elif test "${OS}" = "IRIX" ; then
                     echo $ac_n "checking compiler version""... $ac_c" 1>&6
-echo "configure:1582: checking compiler version" >&5
+echo "configure:1584: checking compiler version" >&5
     CXX_VERSION_STRING=`${CXXCAND} -n32 -version 2>&1 | egrep ersion`
     if test "${CXX_VERSION_STRING}" = "" ; then
       
@@ -1605,7 +1607,7 @@ echo "configure:1582: checking compiler version" >&5
 
     elif test "${OS}" = "Solaris" ; then
     echo $ac_n "checking compiler version""... $ac_c" 1>&6
-echo "configure:1609: checking compiler version" >&5
+echo "configure:1611: checking compiler version" >&5
     CXX_VERSION_STRING=`${CXXCAND} -V 2>&1 | egrep CC:`
     CXX_VERSION=`${ECHO} ${CXX_VERSION_STRING} | ${TR} -d "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ:" | ${TR} -s " " | ${CUT} -d\  -f2`
     
@@ -1634,7 +1636,7 @@ echo "configure:1609: checking compiler version" >&5
   fi
           
   echo $ac_n "checking standardized compiler name""... $ac_c" 1>&6
-echo "configure:1638: checking standardized compiler name" >&5
+echo "configure:1640: checking standardized compiler name" >&5
   if test "${CXX_VERSION_1}" != "" ; then
     _CXX_NAME="${_CXX_NAME}-${CXX_VERSION_1}"
     if test "${CXX_VERSION_2}" != "" ; then
@@ -1719,7 +1721,7 @@ fi
 
 
 echo $ac_n "checking compiler flags to build ${LINKING_MODE} libraries with ${CXX_STD_NAME} on ${OS}""... $ac_c" 1>&6
-echo "configure:1723: checking compiler flags to build ${LINKING_MODE} libraries with ${CXX_STD_NAME} on ${OS}" >&5
+echo "configure:1725: checking compiler flags to build ${LINKING_MODE} libraries with ${CXX_STD_NAME} on ${OS}" >&5
 tableline=`grep "${OS}" confdir/flagtable | grep "${LINKING_MODE}" | grep " ${CXX_STD_NAME}" | grep ${CXX2}`
 CXX2_COMMAND=`${ECHO} ${tableline} | cut -d, -f5`
 CXX_COMP_FLAGS=`${ECHO} ${tableline} | cut -d, -f6`
@@ -1785,7 +1787,7 @@ else
 fi
 
 echo $ac_n "checking LEDA Installation""... $ac_c" 1>&6
-echo "configure:1789: checking LEDA Installation" >&5
+echo "configure:1791: checking LEDA Installation" >&5
 _found_ledaroot="false"
 if test -f "${LEDAROOT}/incl/LEDA/basic.h"; then
   echo "$ac_t""found, v4.5 or older" 1>&6
@@ -1815,7 +1817,7 @@ if test "$_found_ledaroot" = "true"; then
 fi
 
 echo $ac_n "checking how to run the C++ preprocessor""... $ac_c" 1>&6
-echo "configure:1819: checking how to run the C++ preprocessor" >&5
+echo "configure:1821: checking how to run the C++ preprocessor" >&5
 if test -z "$CXXCPP"; then
 if eval "test \"`echo '$''{'ac_cv_prog_CXXCPP'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
@@ -1828,12 +1830,12 @@ ac_link='${CXX-g++} -o conftest${ac_exeext} $CXXFLAGS $CPPFLAGS $LDFLAGS conftes
 cross_compiling=$ac_cv_prog_cxx_cross
   CXXCPP="${CXX-g++} -E"
   cat > conftest.$ac_ext <<EOF
-#line 1832 "configure"
+#line 1834 "configure"
 #include "confdefs.h"
 #include <stdlib.h>
 EOF
 ac_try="$ac_cpp conftest.$ac_ext >/dev/null 2>conftest.out"
-{ (eval echo configure:1837: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
+{ (eval echo configure:1839: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
 ac_err=`grep -v '^ *+' conftest.out | grep -v "^conftest.${ac_ext}\$"`
 if test -z "$ac_err"; then
   :
@@ -1859,17 +1861,17 @@ echo "$ac_t""$CXXCPP" 1>&6
 
 ac_safe=`echo "assert.h" | sed 'y%./+-%__p_%'`
 echo $ac_n "checking for assert.h""... $ac_c" 1>&6
-echo "configure:1863: checking for assert.h" >&5
+echo "configure:1865: checking for assert.h" >&5
 if eval "test \"`echo '$''{'ac_cv_header_$ac_safe'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1868 "configure"
+#line 1870 "configure"
 #include "confdefs.h"
 #include <assert.h>
 EOF
 ac_try="$ac_cpp conftest.$ac_ext >/dev/null 2>conftest.out"
-{ (eval echo configure:1873: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
+{ (eval echo configure:1875: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
 ac_err=`grep -v '^ *+' conftest.out | grep -v "^conftest.${ac_ext}\$"`
 if test -z "$ac_err"; then
   rm -rf conftest*
@@ -1895,7 +1897,7 @@ fi
 LEP_COMP_FLAGS=""   LEP_LIB_FLAGS=""    LEP_LINK_FLAGS=""   LEP_LIBS=""         		    
 
 echo $ac_n "checking Additional compiler and linker flags and libraries""... $ac_c" 1>&6
-echo "configure:1899: checking Additional compiler and linker flags and libraries" >&5
+echo "configure:1901: checking Additional compiler and linker flags and libraries" >&5
 tableline=`grep "${OS}" confdir/userflagtable | grep ${LINKING_MODE} | grep " ${CXX_STD_NAME}"`
 
 LEP_COMP_FLAGS=`${ECHO} ${tableline} | cut -d, -f4`
@@ -1925,12 +1927,12 @@ echo "$ac_t""done" 1>&6
 
 
 echo $ac_n "checking for ANSI C header files""... $ac_c" 1>&6
-echo "configure:1929: checking for ANSI C header files" >&5
+echo "configure:1931: checking for ANSI C header files" >&5
 if eval "test \"`echo '$''{'ac_cv_header_stdc'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1934 "configure"
+#line 1936 "configure"
 #include "confdefs.h"
 #include <stdlib.h>
 #include <stdarg.h>
@@ -1938,7 +1940,7 @@ else
 #include <float.h>
 EOF
 ac_try="$ac_cpp conftest.$ac_ext >/dev/null 2>conftest.out"
-{ (eval echo configure:1942: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
+{ (eval echo configure:1944: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
 ac_err=`grep -v '^ *+' conftest.out | grep -v "^conftest.${ac_ext}\$"`
 if test -z "$ac_err"; then
   rm -rf conftest*
@@ -1955,7 +1957,7 @@ rm -f conftest*
 if test $ac_cv_header_stdc = yes; then
   # SunOS 4.x string.h does not declare mem*, contrary to ANSI.
 cat > conftest.$ac_ext <<EOF
-#line 1959 "configure"
+#line 1961 "configure"
 #include "confdefs.h"
 #include <string.h>
 EOF
@@ -1973,7 +1975,7 @@ fi
 if test $ac_cv_header_stdc = yes; then
   # ISC 2.0.2 stdlib.h does not declare free, contrary to ANSI.
 cat > conftest.$ac_ext <<EOF
-#line 1977 "configure"
+#line 1979 "configure"
 #include "confdefs.h"
 #include <stdlib.h>
 EOF
@@ -1994,7 +1996,7 @@ if test "$cross_compiling" = yes; then
   :
 else
   cat > conftest.$ac_ext <<EOF
-#line 1998 "configure"
+#line 2000 "configure"
 #include "confdefs.h"
 #ifdef __cplusplus
 extern "C" void exit(int);
@@ -2008,7 +2010,7 @@ if (XOR (islower (i), ISLOWER (i)) || toupper (i) != TOUPPER (i)) exit(2);
 exit (0); }
 
 EOF
-if { (eval echo configure:2012: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext} && (./conftest; exit) 2>/dev/null
+if { (eval echo configure:2014: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext} && (./conftest; exit) 2>/dev/null
 then
   :
 else
@@ -2032,12 +2034,12 @@ EOF
 fi
 
 echo $ac_n "checking for size_t""... $ac_c" 1>&6
-echo "configure:2036: checking for size_t" >&5
+echo "configure:2038: checking for size_t" >&5
 if eval "test \"`echo '$''{'ac_cv_type_size_t'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 2041 "configure"
+#line 2043 "configure"
 #include "confdefs.h"
 #include <sys/types.h>
 #if STDC_HEADERS
@@ -2065,12 +2067,12 @@ EOF
 fi
 
 echo $ac_n "checking whether time.h and sys/time.h may both be included""... $ac_c" 1>&6
-echo "configure:2069: checking whether time.h and sys/time.h may both be included" >&5
+echo "configure:2071: checking whether time.h and sys/time.h may both be included" >&5
 if eval "test \"`echo '$''{'ac_cv_header_time'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 2074 "configure"
+#line 2076 "configure"
 #include "confdefs.h"
 #include <sys/types.h>
 #include <sys/time.h>
@@ -2079,7 +2081,7 @@ int main() {
 struct tm *tp;
 ; return 0; }
 EOF
-if { (eval echo configure:2083: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+if { (eval echo configure:2085: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
   rm -rf conftest*
   ac_cv_header_time=yes
 else
@@ -2105,12 +2107,12 @@ fi
 for ac_func in strstr
 do
 echo $ac_n "checking for $ac_func""... $ac_c" 1>&6
-echo "configure:2109: checking for $ac_func" >&5
+echo "configure:2111: checking for $ac_func" >&5
 if eval "test \"`echo '$''{'ac_cv_func_$ac_func'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 2114 "configure"
+#line 2116 "configure"
 #include "confdefs.h"
 /* System header to define __stub macros and hopefully few prototypes,
     which can conflict with char $ac_func(); below.  */
@@ -2136,7 +2138,7 @@ $ac_func();
 
 ; return 0; }
 EOF
-if { (eval echo configure:2140: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
+if { (eval echo configure:2142: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
   rm -rf conftest*
   eval "ac_cv_func_$ac_func=yes"
 else
@@ -2164,10 +2166,16 @@ done
 BINFMT="${BINFMT}-${CXX_NAME}"
 
 
+if test "${CXX_VERSION_1}" -le 2; then
+	IOSTREAM_HEADER="iostream.h"
+else
+	IOSTREAM_HEADER="iostream"
+fi
+
 # Extract the first word of "dirname", so it can be a program name with args.
 set dummy dirname; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:2171: checking for $ac_word" >&5
+echo "configure:2179: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_path_DIRNAME'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -2201,13 +2209,13 @@ else
 fi
 
 echo $ac_n "checking for ${CXX_STD_NAME} header files...""... $ac_c" 1>&6
-echo "configure:2205: checking for ${CXX_STD_NAME} header files..." >&5
-${ECHO} "#include <iostream.h>" >/tmp/$$.test.C
-LINES=`${CXX} -E /tmp/$$.test.C | egrep /iostream.h\"`
+echo "configure:2213: checking for ${CXX_STD_NAME} header files..." >&5
+${ECHO} "#include <${IOSTREAM_HEADER}>" >/tmp/$$.test.C
+LINES=`${CXX} -E /tmp/$$.test.C | egrep /${IOSTREAM_HEADER}\"`
 ${RM} /tmp/$$.test.C
 TEST=""
 for i in $LINES ; do
-  T=`${ECHO} $i | egrep /iostream.h\"`
+  T=`${ECHO} $i | egrep /${IOSTREAM_HEADER}\"`
   if test "$T" != "" && test "$TEST" = "" ; then
     TEST=$i
   fi
@@ -2367,6 +2375,7 @@ s%@LEP_COMP_FLAGS@%$LEP_COMP_FLAGS%g
 s%@LEP_LIB_FLAGS@%$LEP_LIB_FLAGS%g
 s%@LEP_LINK_FLAGS@%$LEP_LINK_FLAGS%g
 s%@LEP_LIBS@%$LEP_LIBS%g
+s%@LEP_WLIBS@%$LEP_WLIBS%g
 s%@RFLAG@%$RFLAG%g
 s%@HAS_GPLUSPLUS@%$HAS_GPLUSPLUS%g
 s%@STD_CPP_INCLUDES@%$STD_CPP_INCLUDES%g

@@ -1,7 +1,10 @@
-dnl    $Id: configure.in,v 1.4 2005/02/10 16:23:41 michail Exp $
+dnl    $Id: configure.in,v 1.6 2005/02/22 16:09:53 michail Exp $
 dnl
 dnl    Modified for LEDA LEPS by M. Seel
-dnl    Modified to support LEDA 5.x and headers compatibility by D. Michail
+dnl
+dnl    Modified to support LEDA 5.x and headers compatibility,
+dnl    Fixes on acquiring g++ version number.
+dnl    by Dimitrios Michail
 dnl
 dnl    Process this file with autoconf to produce a configure script.
 dnl   
@@ -61,6 +64,7 @@ AC_SUBST(LEP_COMP_FLAGS)    dnl LEP specific C++ compiler flags
 AC_SUBST(LEP_LIB_FLAGS)     dnl LEP specific C++ linker flags
 AC_SUBST(LEP_LINK_FLAGS)    dnl LEP specific C++ linker flags for building exe
 AC_SUBST(LEP_LIBS)          dnl LEP specific additional libraries
+AC_SUBST(LEP_WLIBS)         dnl LEP extra libraries used when -lW is present
 AC_SUBST(RFLAG)             dnl C++ linker option -R
 AC_SUBST(HAS_GPLUSPLUS)     dnl true, if C++ compiler is g++
 AC_SUBST(STD_CPP_INCLUDES)  dnl standard include paths of C++ compiler
@@ -414,6 +418,9 @@ OSMAJOR=`${ECHO} $OSREV|${CUT} -d"." -f1`
 dnl		default...
 BINFMT="${OS}"
 
+dnl by default use X11 libs
+LEP_WLIBS="-lX11"
+
 if test "$OS" = SunOS ; then
 	if test "$OSMAJOR" = 5 ; then
 		OS=Solaris
@@ -422,12 +429,13 @@ if test "$OS" = SunOS ; then
 	else
 		OS=SunOS
 	fi
-	SOLLIBS="-lsocket -lthread"
+dnl	SOLLIBS="-lsocket -lthread"
 fi
 
 if test "$OS" = Linux -o "$OS" = "CYGWIN_NT-5.0" ; then
 	if test "$OS" = "CYGWIN_NT-5.0" ; then
 		OS=Cygwin
+		LEP_WLIBS="-luser32 -lgdi32 -lcomdlg32 -lshell32 -lwsock32"
 	fi
 
 	PROCESSOR=`${UNAME} -m`
@@ -570,7 +578,9 @@ EOF
   dnl
   if test "${IS_GXX}" = "true" ; then
     AC_MSG_CHECKING(compiler version)
-    CXX_VERSION=`$2 --version`
+
+dnl    CXX_VERSION=`$2 --version`
+    CXX_VERSION=`$2 -v 2>&1 | grep "gcc version" | ${CUT} -d' ' -f3`
     CXX_COMPILER_NAME="g++"
     VERSION_OUTPUT="g++ ${CXX_VERSION}"
     IS_EGXX=false
@@ -712,8 +722,6 @@ if test "${CXX_SEARCH_LIST}" = "" ; then
 fi
 
 CXX_NAME=""
-
-
 
 dnl
 dnl		Search for the C++ compiler
@@ -1045,14 +1053,20 @@ dnl    (quite probable the case) - it doesn't matter
 dnl    Don't try to find out how this bad hack works...
 dnl
 
+if test "${CXX_VERSION_1}" -le 2; then
+	IOSTREAM_HEADER="iostream.h"
+else
+	IOSTREAM_HEADER="iostream"
+fi
+
 AC_PATH_PROG(DIRNAME,dirname,no)
 AC_MSG_CHECKING(for ${CXX_STD_NAME} header files...)
-${ECHO} "#include <iostream.h>" >/tmp/$$.test.C
-LINES=`${CXX} -E /tmp/$$.test.C | egrep /iostream.h\"`
+${ECHO} "#include <${IOSTREAM_HEADER}>" >/tmp/$$.test.C
+LINES=`${CXX} -E /tmp/$$.test.C | egrep /${IOSTREAM_HEADER}\"`
 ${RM} /tmp/$$.test.C
 TEST=""
 for i in $LINES ; do
-  T=`${ECHO} $i | egrep /iostream.h\"`
+  T=`${ECHO} $i | egrep /${IOSTREAM_HEADER}\"`
   if test "$T" != "" && test "$TEST" = "" ; then
     TEST=$i
   fi

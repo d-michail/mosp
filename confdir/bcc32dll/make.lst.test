@@ -1,0 +1,8 @@
+LEPNAME = rmm
+LEDALIBS = leda.lib
+WINLIBS =
+LEDAFLAGS = -DLEDA_DLL
+PROGS = RANK_MAX_TEST.exe
+
+
+

@@ -110,4 +110,113 @@ a) Header Files
 
    The manual is also contained in the doc directory.	
 
+
+
+
+*******************************************************************************
+*                                                                             *
+*                         Rank Maximal Matchings                              *
+*                                                                             *
+*                          WINDOWS INSTALLATION                               *
+*                                                                             *
+*******************************************************************************
+
+
+6. WINDOWS - BORLAND C++ BCC32 (STATIC)
+-----------------------------------
+
+The LEP can be compiled for use with the LEDA and Borland bcc32
+compiler. LEDA must be compiled as static.
+
+a) install LEDA with static variables, LEDAROOT=path to leda
+   The LEDAROOT directory should contains some or all of these files
+
+	libL.lib      basic library
+  	libG.lib      graph library
+  	libP.lib      d2-geo library
+  	libD3.lib     d3-geo library
+  	libGeoW.lib   GeoWin library
+  	libW.lib      window library
+
+b) Setting the Environment Variables for Borland C++:
+
+    * Make sure that the directory of bcc32.exe is contained in your path. bcc32.exe is 
+	  located in the \bin directory of your compiler, 
+	  e.g., in c:\borland\bcc55\bin
+    * Make sure that there is a file bcc32.cfg in the \bin directory of your compiler 
+	  which sets the compiler options for the include and lib paths to the correct 
+	  directories. On the author's machine this means adding the lines
+      -I"c:\borland\bcc55\include"
+      -L"c:\borland\bcc55\lib"
+      to bcc32.cfg.
+    * Make sure that there is a file ilink32.cfg in the \bin directory of your compiler which 
+	  sets the linker options for the lib path to the correct directory. On the author's 
+	  machine this means adding the line
+      -L"c:\borland\bcc55\lib" -L"c:\borland\bcc55\lib\PSDK"
+      to ilink32.cfg.
+
+c) Go to the <LEP>/rmm directory and execute make_bcc_static.bat
+   To clean the sources run 
+   
+   make allclean
+
+   or simply
+
+   make clean
+
+d) To compile your program use something like
+
+   bcc32 -P -I<LEP>/rmm/incl -I%LEDAROOT%/incl \
+            -L<LEP>/rmm -L%LEDAROOT% \
+			yoursource.c librmm.lib libg.lib libl.lib ...
+
+7. WINDOWS - BORLAND C++ BCC32 (DYNAMIC)
+----------------------------------------
+
+The LEP can be compiled for use with the LEDA and Borland bcc32
+compiler. LEDA must be as dynamic library (dll).
+
+a) install LEDA and set LEDAROOT=path to leda
+   The LEDAROOT directory should contain the following files
+
+	leda.dll
+	leda.lib
+	libGeoW.lib
+
+   Add to the PATH variable the LEDAROOT path, so that the leda.dll can 
+   be found, or copy leda.dll to some other appropriate path.
+
+b) Setting the Environment Variables for Borland C++:
+
+    * Make sure that the directory of bcc32.exe is contained in your path. bcc32.exe is 
+	  located in the \bin directory of your compiler, 
+	  e.g., in c:\borland\bcc55\bin
+    * Make sure that there is a file bcc32.cfg in the \bin directory of your compiler 
+	  which sets the compiler options for the include and lib paths to the correct 
+	  directories. On the author's machine this means adding the lines
+      -I"c:\borland\bcc55\include"
+      -L"c:\borland\bcc55\lib"
+      to bcc32.cfg.
+    * Make sure that there is a file ilink32.cfg in the \bin directory of your compiler which 
+	  sets the linker options for the lib path to the correct directory. On the author's 
+	  machine this means adding the line
+      -L"c:\borland\bcc55\lib" -L"c:\borland\bcc55\lib\PSDK"
+      to ilink32.cfg.
+
+c) Go to the <LEP>/rmm directory and execute make_bcc_dll.bat
+   To clean the sources run 
+   
+   make allclean
+
+   or simply
+
+   make clean
+
+d) To compile your program use something like
+
+   bcc32 -P -DLEDA_DLL -I<LEP>/rmm/incl -I%LEDAROOT%/incl \
+         -L<LEP>/rmm -L%LEDAROOT% \
+	  yoursource.c librmm.lib leda.lib
+
+
 - Dimitrios Michail 

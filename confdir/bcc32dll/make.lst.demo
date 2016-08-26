@@ -1,0 +1,8 @@
+LEPNAME = rmm
+LEDALIBS = leda.lib libGeoW.lib
+WINLIBS =
+LEDAFLAGS = -DLEDA_DLL
+PROGS = GW_RANK_MAX_DEMO.exe
+
+
+

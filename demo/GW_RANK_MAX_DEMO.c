@@ -1,8 +1,7 @@
-#line 443 "RANK_MAX_MATCHING.lw"
 //---------------------------------------------------------------------
 // File automatically generated from notangle from RANK_MAX_MATCHING.lw
 // 
-// mails and bugs: Dimitrios Michail <dimitrios.michail@gmail.com>
+// mails and bugs: Dimitrios Michail <dimitris.michail@gmail.com>
 //--------------------------------------------------------------------- 
 // 
 // This program can be freely used in an academic environment
@@ -25,7 +24,6 @@
 //
 // Copyright 2004 - Dimitrios Michail
 
-#line 1362 "RANK_MAX_MATCHING.lw"
 #include <LEDA/graphwin.h>
 #include <LEP/rmm/RANK_MAX_MATCHING.h>
 
@@ -50,7 +48,7 @@ node v; edge e;
 forall_edges(e,G) cost[e] = Gcost[e];
 
 if ( ! leda::Is_Bipartite(G) ) {
-	gw.message("\\bf Graph is NOT Bipartite!");
+        gw.message("\\bf Graph is NOT Bipartite!");
 }
 
 // fix graph to comply with preconditions
@@ -61,18 +59,18 @@ leda::list<edge> C;
 C = BI_RANK_MAX_MATCHING( G , cost );
 
 forall_edges(e,G) {
-	gw.set_color( e, leda::black );
-	gw.set_label(e, leda::string("%d",cost[e]));
+        gw.set_color( e, leda::black );
+        gw.set_label(e, leda::string("%d",cost[e]));
 }
 
 leda::list_item lq;
 forall_items(lq, C){
-	gw.set_color( C.contents(lq), leda::red );
+        gw.set_color( C.contents(lq), leda::red );
 }
 
 // check correctness
 if ( ! RMM_DEBUG_is_valid_matching( G, C ) ) { 
-	gw.message("\\bf ERROR, not a matching!" );
+        gw.message("\\bf ERROR, not a matching!" );
 }
 
 gw.set_flush(flush);
@@ -82,49 +80,49 @@ gw.redraw();
 void new_node_handler(GraphWin& gw, node) {}
 
 void new_edge_handler(GraphWin& gw, edge e) {
-	if ( ! leda::Is_Bipartite(G) ) {
-		gw.message("\\bf Cannot add edge, graph will NOT be bipartite!");
-		gw.del_edge( e );
-		return;
-	}
-	Gcost[e] = leda::rand_int(1,10);
-	gw.set_slider_value(e,Gcost[e]/10.0,1);
-	run_and_display(gw);
+        if ( ! leda::Is_Bipartite(G) ) {
+                gw.message("\\bf Cannot add edge, graph will NOT be bipartite!");
+                gw.del_edge( e );
+                return;
+        }
+        Gcost[e] = leda::rand_int(1,10);
+        gw.set_slider_value(e,Gcost[e]/10.0,1);
+        run_and_display(gw);
 }
 
 void del_edge_handler(GraphWin& gw) { 
-	run_and_display(gw);
+        run_and_display(gw);
 }
 
 void del_node_handler(GraphWin& gw) { 
-	run_and_display(gw);
+        run_and_display(gw);
 }
 
 void init_graph_handler( GraphWin &gw ) { 
-	edge e;
-	forall_edges(e,G) {
-		Gcost[e] = leda::rand_int(1, 10);
-		gw.set_slider_value(e,Gcost[e]/10.0,1);
-	}
-	run_and_display(gw);
+        edge e;
+        forall_edges(e,G) {
+                Gcost[e] = leda::rand_int(1, 10);
+                gw.set_slider_value(e,Gcost[e]/10.0,1);
+        }
+        run_and_display(gw);
 }
 
 // rank sliders
 
 void start_cost_slider_handler(GraphWin& gw, edge, double)
 { 
-	gw.message("\\bf\\red Change Edge Rank"); 
+        gw.message("\\bf\\red Change Edge Rank"); 
 }
 
 void cost_slider_handler(GraphWin& gw, edge e, double f) 
 { 
-	Gcost[e] = int(10*f);
-	if( Gcost[e] == 0 ) Gcost[e] = 1;
+        Gcost[e] = int(10*f);
+        if( Gcost[e] == 0 ) Gcost[e] = 1;
 }
 
 void end_cost_slider_handler(GraphWin& gw, edge, double)
 { 
-	run_and_display(gw);
+        run_and_display(gw);
 }
 
 int main() 
