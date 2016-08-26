@@ -11,7 +11,7 @@ include make.lst
 # General settings
 #------------------------------------------------------------------------------
 
-IFLAGS = -I$(LEDA_INCL_PATH) -I$(LEP_INCL_PATH)
+IFLAGS = $(patsubst %,-I%,$(subst :, ,$(LEDA_INCL_PATH))) -I$(LEP_INCL_PATH) 
 LFLAGS = -L$(LEDA_LIB_PATH) -L$(LEP_LIB_PATH)
 RFLAGS = $(RFLAG)$(LEDA_LIB_PATH) $(RFLAG)$(LEP_LIB_PATH)
 CFLAGS = $(CXX_OPT) $(CXX_FLAGS) $(CXX_USER_FLAGS)

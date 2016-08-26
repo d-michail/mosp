@@ -1,16 +1,36 @@
-#line 415 "RANK_MAX_MATCHING.lw"
+#line 443 "RANK_MAX_MATCHING.lw"
 //---------------------------------------------------------------------
 // File automatically generated from notangle from RANK_MAX_MATCHING.lw
 // 
 // mails and bugs: Dimitrios Michail <dimitrios.michail@gmail.com>
 //--------------------------------------------------------------------- 
+// 
+// This program can be freely used in an academic environment
+// ONLY for research purposes. Any other use is strictly
+// prohibited by the author, without an explicit permission.
+//
+// Note that this program uses the LEDA library, which is
+// NOT free. For more details visit Algorithmic Solutions
+// at http://www.algorithmic-solutions.com/
+//
+// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+// ! Any commercial use of this software is strictly !
+// ! prohibited without explicit permission by the   !
+// ! author.                                         !
+// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 
+//
+// This software is distributed in the hope that it will be useful, 
+// but WITHOUT ANY WARRANTY; without even the implied warranty of 
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+//
+// Copyright 2004 - Dimitrios Michail
 
-#line 450 "RANK_MAX_MATCHING.lw"
+#line 500 "RANK_MAX_MATCHING.lw"
 #include <LEDA/graph.h>
 #include <LEDA/array.h>
 #include <LEDA/std/assert.h>
 
-#line 455 "RANK_MAX_MATCHING.lw"
+#line 505 "RANK_MAX_MATCHING.lw"
 #if defined(LEDA_NAMESPACE)
 using leda::graph;
 using leda::list;
@@ -22,16 +42,16 @@ using leda::edge;
 using leda::edge_array;
 #endif
 
-#line 473 "RANK_MAX_MATCHING.lw"
+#line 523 "RANK_MAX_MATCHING.lw"
 static int total_edge_set_size;
 
-#line 490 "RANK_MAX_MATCHING.lw"
+#line 540 "RANK_MAX_MATCHING.lw"
 #define is_matched(edge) ( mate[source(edge)] == target(edge) )
 
-#line 678 "RANK_MAX_MATCHING.lw"
+#line 733 "RANK_MAX_MATCHING.lw"
 typedef struct { bool odd, follow_both, follow_free; node n; } bfs_info;
 
-#line 681 "RANK_MAX_MATCHING.lw"
+#line 736 "RANK_MAX_MATCHING.lw"
 static void partition_graph_node_set_by_bfs( graph& G,
                                              const list<node>& A,
                                              const list<node>& B,
@@ -44,7 +64,7 @@ static void partition_graph_node_set_by_bfs( graph& G,
 					     const int phase
                                              )
 {
-#line 703 "RANK_MAX_MATCHING.lw"
+#line 758 "RANK_MAX_MATCHING.lw"
 list<bfs_info> Q;
 node v; edge e;
 
@@ -55,45 +75,45 @@ forall_nodes(v, G ) { // add initial nodes
 	Q.append( i );
 }
 
-#line 721 "RANK_MAX_MATCHING.lw"
+#line 776 "RANK_MAX_MATCHING.lw"
   while( ! Q.empty() ) { // now traverse in bfs style
     bfs_info i = Q.pop();
     reached[ i.n ] = true; odd[ i.n ] = i.odd;
     
     forall_inout_edges( e , i.n ) { 
       
-#line 802 "RANK_MAX_MATCHING.lw"
+#line 857 "RANK_MAX_MATCHING.lw"
 if ( rank [ e ] > phase ) break;
 
 
-#line 728 "RANK_MAX_MATCHING.lw"
+#line 783 "RANK_MAX_MATCHING.lw"
       if ( ( i.follow_both || i.follow_free ) && 
       	   !reached[ G.opposite(e,i.n) ] && !is_matched(e) ) { 
 	     
-#line 742 "RANK_MAX_MATCHING.lw"
+#line 797 "RANK_MAX_MATCHING.lw"
 	bfs_info nexti; nexti.odd = ! i.odd; nexti.n = G.opposite(e, i.n);
 	nexti.follow_both = false; nexti.follow_free = false;
 	Q.append( nexti );
 
-#line 731 "RANK_MAX_MATCHING.lw"
+#line 786 "RANK_MAX_MATCHING.lw"
       }
       if( ( i.follow_both || ! i.follow_free ) && 
           !reached[ G.opposite(e,i.n) ] && is_matched(e) ) {
 	     
-#line 749 "RANK_MAX_MATCHING.lw"
+#line 804 "RANK_MAX_MATCHING.lw"
 	bfs_info nexti; nexti.odd = ! i.odd; nexti.n = G.opposite( e, i.n );
 	nexti.follow_both = false; nexti.follow_free = true;
 	Q.append( nexti );
 
-#line 735 "RANK_MAX_MATCHING.lw"
+#line 790 "RANK_MAX_MATCHING.lw"
       }
     }
   }
 
-#line 695 "RANK_MAX_MATCHING.lw"
+#line 750 "RANK_MAX_MATCHING.lw"
 }
 
-#line 813 "RANK_MAX_MATCHING.lw"
+#line 868 "RANK_MAX_MATCHING.lw"
 static void prune_edges( graph& G, 
 			 const list<node>& A,
 			 const list<node>& B,
@@ -115,7 +135,7 @@ static void prune_edges( graph& G,
 	  w_is_odd = reached[ w ] & odd[ w ];
 
 	  
-#line 866 "RANK_MAX_MATCHING.lw"
+#line 921 "RANK_MAX_MATCHING.lw"
 	  if ( rank[e] <= phase-1 ) { 
 	    if ( (v_is_odd && ( !reached[ w ] || w_is_odd )) || 
 		 (w_is_odd && ( !reached[ v ] || v_is_odd )) ) {
@@ -131,7 +151,7 @@ static void prune_edges( graph& G,
 	    }
 	  }
 
-#line 834 "RANK_MAX_MATCHING.lw"
+#line 889 "RANK_MAX_MATCHING.lw"
 	  
 	}
       reached[v] = false;
@@ -139,13 +159,13 @@ static void prune_edges( graph& G,
     forall( v, B ) reached[v] = false;
 }
 
-#line 896 "RANK_MAX_MATCHING.lw"
+#line 951 "RANK_MAX_MATCHING.lw"
 static int phase_number_HK;
 
 // an directed edge on an undirected graph
 typedef struct { edge e; node s,t; } d_edge;
 
-#line 902 "RANK_MAX_MATCHING.lw"
+#line 957 "RANK_MAX_MATCHING.lw"
 static bool bfs_HK(graph& G, 
 		   const node_list& free_in_A, 
 		   const node_array<bool>& free, 
@@ -175,10 +195,10 @@ static bool bfs_HK(graph& G,
     int dv = dist[v];
     forall_inout_edges(e, v) { 
       
-#line 802 "RANK_MAX_MATCHING.lw"
+#line 857 "RANK_MAX_MATCHING.lw"
 if ( rank [ e ] > phase ) break;
 
-#line 931 "RANK_MAX_MATCHING.lw"
+#line 986 "RANK_MAX_MATCHING.lw"
       if ( (f.follow_free && is_matched(e)) || 
       	   (!f.follow_free && !is_matched(e)) )
 	continue;
@@ -200,7 +220,7 @@ if ( rank [ e ] > phase ) break;
   return augmenting_path_found;
 }
 
-#line 953 "RANK_MAX_MATCHING.lw"
+#line 1008 "RANK_MAX_MATCHING.lw"
 static d_edge find_aug_path_HK( graph& G,
 				d_edge f,
 				const node_array<bool>& free,
@@ -217,10 +237,10 @@ static d_edge find_aug_path_HK( graph& G,
   edge e;
   forall_inout_edges(e,w) {
     
-#line 802 "RANK_MAX_MATCHING.lw"
+#line 857 "RANK_MAX_MATCHING.lw"
 if ( rank [ e ] > phase ) break;
 
-#line 969 "RANK_MAX_MATCHING.lw"
+#line 1024 "RANK_MAX_MATCHING.lw"
     if ( (!f_matched && is_matched(e)) || (f_matched && !is_matched(e)) )
       continue;
 
@@ -234,7 +254,7 @@ if ( rank [ e ] > phase ) break;
   return fol_nil;
 }
 
-#line 989 "RANK_MAX_MATCHING.lw"
+#line 1044 "RANK_MAX_MATCHING.lw"
 static bool max_card_bipartite_matching_HK( graph& G,
 					    const list<node>& A,
 					    const list<node>& B, 
@@ -263,11 +283,11 @@ static bool max_card_bipartite_matching_HK( graph& G,
     forall(v,free_in_A) { 
       forall_inout_edges(e,v) { 
         
-#line 802 "RANK_MAX_MATCHING.lw"
+#line 857 "RANK_MAX_MATCHING.lw"
 if ( rank [ e ] > phase ) break;
 
 
-#line 1018 "RANK_MAX_MATCHING.lw"
+#line 1073 "RANK_MAX_MATCHING.lw"
 	if ( pred[ G.opposite(e,v) ].e == nil && useful[e] == phase_number_HK) { 
 	  d_edge fol; fol.e=e; fol.s=v; fol.t=G.opposite(v,e);
 	  d_edge f = find_aug_path_HK( G, fol, free, mate, 
@@ -304,7 +324,7 @@ if ( rank [ e ] > phase ) break;
   return true;
 }
 
-#line 767 "RANK_MAX_MATCHING.lw"
+#line 822 "RANK_MAX_MATCHING.lw"
 static void greedy_heuristic( graph& G,
 			      const list<node> A,
 			      const list<node> B,
@@ -318,29 +338,29 @@ static void greedy_heuristic( graph& G,
     if ( ! free[v] ) continue;
     forall_inout_edges( e , v ) { 
       
-#line 802 "RANK_MAX_MATCHING.lw"
+#line 857 "RANK_MAX_MATCHING.lw"
 if ( rank [ e ] > phase ) break;
 
-#line 780 "RANK_MAX_MATCHING.lw"
+#line 835 "RANK_MAX_MATCHING.lw"
       w = G.opposite(e , v );
       if ( free[w] ) { 
       	
-#line 790 "RANK_MAX_MATCHING.lw"
+#line 845 "RANK_MAX_MATCHING.lw"
 free[v] = false; free[w] = false;
 mate[v] = w; mate[w] = v;
 
-#line 783 "RANK_MAX_MATCHING.lw"
+#line 838 "RANK_MAX_MATCHING.lw"
 	break;
       }
     }
   }
 }
 
-#line 498 "RANK_MAX_MATCHING.lw"
+#line 548 "RANK_MAX_MATCHING.lw"
 list<edge> BI_RANK_MAX_MATCHING( graph& G, const edge_array<int>& rank )
 {
   
-#line 532 "RANK_MAX_MATCHING.lw"
+#line 582 "RANK_MAX_MATCHING.lw"
   list<node> A, B; 
   node v; edge e;
   node_array<bool> free(G, true);
@@ -351,10 +371,12 @@ list<edge> BI_RANK_MAX_MATCHING( graph& G, const edge_array<int>& rank )
   node_array<bool> reached(G, false);
   node_array<bool> odd(G);
 
-#line 502 "RANK_MAX_MATCHING.lw"
+#line 552 "RANK_MAX_MATCHING.lw"
   
-#line 556 "RANK_MAX_MATCHING.lw"
+#line 606 "RANK_MAX_MATCHING.lw"
+#if ! defined(LEDA_CHECKING_OFF)
   assert( Is_Bipartite( G, A, B ) && Is_Simple( G ) && Is_Loopfree( G ) );
+#endif
 
   // direct edges from A to B
   forall( v, A ) 
@@ -364,7 +386,10 @@ list<edge> BI_RANK_MAX_MATCHING( graph& G, const edge_array<int>& rank )
   // find minimum rank, and start from that phase
   // also find maximum rank, in order to quit
   forall_edges( e, G ) {
-    assert( rank[e] > 0 );
+#if ! defined(LEDA_CHECKING_OFF)
+    if( rank[e] <= 0 ) 
+    	leda::error_handler(999, "RANK_MAX: illegal rank (non-positive)");
+#endif   
     min_rank = (rank[e] < min_rank)?rank[e]:min_rank;
     max_rank = (rank[e] > max_rank)?rank[e]:max_rank;
   }
@@ -387,9 +412,9 @@ list<edge> BI_RANK_MAX_MATCHING( graph& G, const edge_array<int>& rank )
   G.sort_edges( rank );
 
 
-#line 504 "RANK_MAX_MATCHING.lw"
+#line 554 "RANK_MAX_MATCHING.lw"
   
-#line 596 "RANK_MAX_MATCHING.lw"
+#line 651 "RANK_MAX_MATCHING.lw"
   // first apply the greedy heuristic
   greedy_heuristic( G, A, B, rank, phase , free, mate );
 
@@ -397,13 +422,13 @@ list<edge> BI_RANK_MAX_MATCHING( graph& G, const edge_array<int>& rank )
   max_card_bipartite_matching_HK( G, A, B, free, mate, rank, phase );
 
 
-#line 506 "RANK_MAX_MATCHING.lw"
+#line 556 "RANK_MAX_MATCHING.lw"
   phase++;
   while( phase <= max_rank ) { 
     
-#line 615 "RANK_MAX_MATCHING.lw"
+#line 670 "RANK_MAX_MATCHING.lw"
     
-#line 640 "RANK_MAX_MATCHING.lw"
+#line 695 "RANK_MAX_MATCHING.lw"
     if ( total_edge_set_size == 0 ) break;
     if ( edge_set_size[ phase ] == 0 ) {  
       phase++;
@@ -411,7 +436,7 @@ list<edge> BI_RANK_MAX_MATCHING( graph& G, const edge_array<int>& rank )
     }
 
 
-#line 617 "RANK_MAX_MATCHING.lw"
+#line 672 "RANK_MAX_MATCHING.lw"
     // partition the graph nodes ( Odd, Even, Unreached )
     partition_graph_node_set_by_bfs( G, A, B, free, mate, reached, odd, 
     				     edge_set_size, rank, phase - 1 );
@@ -425,11 +450,11 @@ list<edge> BI_RANK_MAX_MATCHING( graph& G, const edge_array<int>& rank )
     phase++;
     total_edge_set_size -= edge_set_size[ phase - 1 ];
 
-#line 509 "RANK_MAX_MATCHING.lw"
+#line 559 "RANK_MAX_MATCHING.lw"
   }
 
   
-#line 654 "RANK_MAX_MATCHING.lw"
+#line 709 "RANK_MAX_MATCHING.lw"
   list<edge> matched;
   forall_edges( e , G ) 
     if ( is_matched(e) ) 
@@ -439,12 +464,12 @@ list<edge> BI_RANK_MAX_MATCHING( graph& G, const edge_array<int>& rank )
 
   return matched;
 
-#line 512 "RANK_MAX_MATCHING.lw"
+#line 562 "RANK_MAX_MATCHING.lw"
 }
 
 
 
-#line 1063 "RANK_MAX_MATCHING.lw"
+#line 1118 "RANK_MAX_MATCHING.lw"
 array<int> BI_RANK_MAX_MATCHING_PROFILE( const graph& G, 
 	const edge_array<int>& rank,
 	const list<edge>& matching )
@@ -456,7 +481,9 @@ array<int> BI_RANK_MAX_MATCHING_PROFILE( const graph& G,
 	int r;
 	forall( e, matching ) {
 		r = rank[e];
+#if ! defined(LEDA_CHECKING_OFF)
 		assert( r >=1 && r <= G.number_of_nodes() );
+#endif		
 		ar[ r ]++;
 	}
 
@@ -464,7 +491,7 @@ array<int> BI_RANK_MAX_MATCHING_PROFILE( const graph& G,
 }
 
 
-#line 1090 "RANK_MAX_MATCHING.lw"
+#line 1147 "RANK_MAX_MATCHING.lw"
 #include <LEDA/integer.h>
 #include <LEDA/templates/mwb_matching.t>
 
@@ -478,15 +505,17 @@ list<edge> BI_RANK_MAX_MATCHING_MWMR( graph& G,
                 const edge_array<int>& rank ) 
 {
 
-#line 1108 "RANK_MAX_MATCHING.lw"
+#line 1165 "RANK_MAX_MATCHING.lw"
 	// check preconditions
 	int n = G.number_of_nodes();
 	list<node> A,B;
+#if ! defined(LEDA_CHECKING_OFF)
   	assert( leda::Is_Bipartite( G, A, B ) && 
 		leda::Is_Simple( G ) && 
 		leda::Is_Loopfree( G ) );
+#endif		
 
-#line 1120 "RANK_MAX_MATCHING.lw"
+#line 1179 "RANK_MAX_MATCHING.lw"
 	// set edges from A -> B
 	edge e;
 	node v;
@@ -497,20 +526,32 @@ list<edge> BI_RANK_MAX_MATCHING_MWMR( graph& G,
 	}
 
 
-#line 1135 "RANK_MAX_MATCHING.lw"
+#line 1194 "RANK_MAX_MATCHING.lw"
 	// partition edges by rank
 	list<edge> lrank[ n + 1 ];
 	forall_edges(e, G) { 
+#if ! defined(LEDA_CHECKING_OFF)
 		assert( rank[e] > 0 && rank[e] <= n );
+#endif		
 		lrank[ rank[e] ].append( e );
 	}
 
-#line 1149 "RANK_MAX_MATCHING.lw"
+
+#line 1218 "RANK_MAX_MATCHING.lw"
+	bool can_fit_in_long = true;
+
 	// build weight function
 	edge_array<integer> w( G );
 	integer t = 1;
 	for( int i = n; i >=1; i-- ) {
-		// don't increase weight if not edge
+		// check if 3 times the current weight fits 
+		// in long datatype
+		// the LEDA algorithm uses at most 3C numbers
+		// where C is the maximum integer weight of an edge
+		if ( ( ( 3 * t ).is_long() ) == false )
+			can_fit_in_long = false;
+	
+		// don't increase weight if no edge
 		if ( lrank[i].empty() ) continue;
 
 		forall( e, lrank[i] )
@@ -518,15 +559,28 @@ list<edge> BI_RANK_MAX_MATCHING_MWMR( graph& G,
 		t *= n;
 	}
 
-#line 1166 "RANK_MAX_MATCHING.lw"
-	// solve MWM
-	return leda::MAX_WEIGHT_BIPARTITE_MATCHING_T<integer>( G, A, B, w );
+		
+
+
+#line 1247 "RANK_MAX_MATCHING.lw"
+	// now solve appropriately, either with integers or with long
+	if ( can_fit_in_long ) {  // solve with long
+		edge_array<long> wl( G );
+		forall_edges( e, G )
+			wl[e] = w[e].to_long();
+		
+		return leda::MAX_WEIGHT_BIPARTITE_MATCHING_T<long>( G, A, B, wl );
+	}
+	else // solve MWM
+		return leda::MAX_WEIGHT_BIPARTITE_MATCHING_T<integer>( G, A, B, w );
 }
 
 
-#line 1179 "RANK_MAX_MATCHING.lw"
+
+#line 1269 "RANK_MAX_MATCHING.lw"
 // debugging
-bool RMM_DEBUG_is_valid_matching( graph &G, const list<edge>& matching ) { 
+bool RMM_DEBUG_is_valid_matching( graph &G, 
+	const list<edge>& matching ) { 
 	node_array<int> v(G,0);
 	edge e;
 	forall (e, matching) { 

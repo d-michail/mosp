@@ -1,12 +1,32 @@
-#line 415 "RANK_MAX_MATCHING.lw"
+#line 443 "RANK_MAX_MATCHING.lw"
 //---------------------------------------------------------------------
 // File automatically generated from notangle from RANK_MAX_MATCHING.lw
 // 
 // mails and bugs: Dimitrios Michail <dimitrios.michail@gmail.com>
 //--------------------------------------------------------------------- 
+// 
+// This program can be freely used in an academic environment
+// ONLY for research purposes. Any other use is strictly
+// prohibited by the author, without an explicit permission.
+//
+// Note that this program uses the LEDA library, which is
+// NOT free. For more details visit Algorithmic Solutions
+// at http://www.algorithmic-solutions.com/
+//
+// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+// ! Any commercial use of this software is strictly !
+// ! prohibited without explicit permission by the   !
+// ! author.                                         !
+// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 
+//
+// This software is distributed in the hope that it will be useful, 
+// but WITHOUT ANY WARRANTY; without even the implied warranty of 
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+//
+// Copyright 2004 - Dimitrios Michail
 
 
-#line 1200 "RANK_MAX_MATCHING.lw"
+#line 1296 "RANK_MAX_MATCHING.lw"
 #include <iostream>
 #include <LEP/rmm/RANK_MAX_MATCHING.h>
 
@@ -23,8 +43,9 @@ int main() {
     leda::list<leda::node> A,B;
     leda::node v; leda::edge e;
 
-    int n = 1000;
-    int m = 10*n;  
+    int n = 1000;  
+    int m = n/8 * n/8;  
+    float T1,T2;
 
     // create random graph
     leda::random_bigraph( G, n, n, m, A, B );
@@ -36,11 +57,15 @@ int main() {
     forall_edges(e,G) rank[e] = leda::rand_int(1,n);
 
     // now solve
+    leda::used_time( T1 );
     leda::list<leda::edge> C = BI_RANK_MAX_MATCHING( G, rank );
+    T1 = leda::used_time( T1 );
     leda::array<int> pr = BI_RANK_MAX_MATCHING_PROFILE( G, rank, C );
 
     // and with reduction to the weight matching
+    leda::used_time( T2 );
     leda::list<leda::edge> C1 = BI_RANK_MAX_MATCHING_MWMR( G, rank );
+    T2 = leda::used_time( T2 );
     leda::array<int> pr1 = BI_RANK_MAX_MATCHING_PROFILE( G, rank, C1 );
 
     //std::cout << std::endl << " profile       : " << pr << std::endl;
@@ -52,7 +77,7 @@ int main() {
     assert( pr.size() == pr1.size() );
     for( int j = 1; j <= G.number_of_nodes(); ++j )
     	assert( pr[j] == pr1[j] );
-    std::cout << " (PASSED)";
+    std::cout << " COMB:" << T1 << " MWMR:" << T2 << " (PASSED)";
 
   }
   std::cout << std::endl;

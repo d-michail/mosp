@@ -1,5 +1,8 @@
-dnl    $Id: configure.in,v 1.3 2004/09/24 12:24:01 michail Exp $
+dnl    $Id: configure.in,v 1.4 2005/02/10 16:23:41 michail Exp $
+dnl
 dnl    Modified for LEDA LEPS by M. Seel
+dnl    Modified to support LEDA 5.x and headers compatibility by D. Michail
+dnl
 dnl    Process this file with autoconf to produce a configure script.
 dnl   
 
@@ -32,6 +35,7 @@ AC_SUBST(CXX_NAME)      dnl standard compiler name, used by default
 AC_SUBST(CXX_STD_NAME)  dnl standard compiler name
 AC_SUBST(CXX_FOUND_LIST) dnl perl list of usable compilers (short names)
 AC_SUBST(LINKING_MODE)  dnl linking mode (shared/static)
+AC_SUBST(HEADER_COMPAT) dnl header compatibility mode for LEDA version >= 5.0
 AC_SUBST(LIB_SUFFIX)     dnl library suffix
 
 AC_SUBST(OSMAJOR)       dnl OS-version (First number)
@@ -662,6 +666,21 @@ else
   AC_MSG_RESULT(no)
 fi
 
+dnl -------------------------------------------------------------------
+dnl
+dnl 	header compatibility mode?
+dnl
+
+AC_MSG_CHECKING(whether to enable header compatibility mode)
+if test "${HEADER_COMPAT}" != "yes"; then
+  HEADER_COMPAT="no";
+  AC_MSG_RESULT(no)
+else
+  HEADER_COMPAT="yes";
+  AC_MSG_RESULT(yes)
+fi
+
+
 dnl --------------------------------------------------------------------
 dnl
 dnl looking for standard compilers:
@@ -930,17 +949,34 @@ else
 fi
 
 AC_MSG_CHECKING(LEDA Installation)
+_found_ledaroot="false"
 if test -f "${LEDAROOT}/incl/LEDA/basic.h"; then
-  AC_MSG_RESULT(found)
+  AC_MSG_RESULT([found, v4.5 or older])
   LEDA_INCL_PATH="${LEDAROOT}/incl"
+  _found_ledaroot="true"
+else
+    if test -f "${LEDAROOT}/incl/LEDA/system/basic.h"; then
+      AC_MSG_RESULT([found, v5.0 or newer])
+      LEDA_INCL_PATH="${LEDAROOT}/incl"
+
+      if test "${HEADER_COMPAT}" = "yes" && test -f "${LEDAROOT}/incl_old/LEDA/basic.h"; then
+        AC_MSG_RESULT([enabling header compatibility mode...])
+        LEDA_INCL_PATH="$LEDA_INCL_PATH ${LEDAROOT}/incl_old"
+      fi
+      _found_ledaroot="true"
+    else
+      AC_MSG_ERROR([LEDAROOT not defined!])
+    fi
+fi
+
+if test "$_found_ledaroot" = "true"; then 
   if test "${LINKING_MODE}" = "shared" ; then
     LEDA_LIB_PATH="${LEDAROOT}"
   else
     LEDA_LIB_PATH="${LEDAROOT}/static"
   fi
-else
-  AC_MSG_ERROR([LEDAROOT not defined!])
 fi
+
 AC_CHECK_HEADER(assert.h)
 
 dnl ------------------------------------------------------------
@@ -1073,6 +1109,7 @@ dnl else
   AC_MSG_OUT(["C++ compiler flags   :     CXX_FLAGS = '${CXX_FLAGS}'"])
   AC_MSG_OUT(["linking mode         :     LINKING_MODE = '${LINKING_MODE}'"])
   AC_MSG_OUT(["LEDA root dir        :     LEDAROOT = '${LEDAROOT}'"])
+  AC_MSG_OUT(["Header compatibility :     HEADER_COMPAT = '${HEADER_COMPAT}'"])
   AC_MSG_OUT([""])
   AC_MSG_OUT(["The following default compiler commands can be choosen by setting CXX2:"])
   AC_MSG_OUT(["${CXX2_OUTPUT2}"])
@@ -1080,15 +1117,16 @@ dnl else
   AC_MSG_OUT(["You can change these settings by running configure again with"])
   AC_MSG_OUT(["predefined variables. Type"])
   AC_MSG_OUT([""])
-  AC_MSG_OUT(["  [CXX=<compiler>] [CXX2=<defsetting>] [CXX_FLAGS=<flags>] [LINKING_MODE=<linkmode>] [LEDAROOT=<ledaroot>] configure"])
+  AC_MSG_OUT(["  [CXX=<compiler>] [CXX2=<defsetting>] [CXX_FLAGS=<flags>] [LINKING_MODE=<linkmode>] [LEDAROOT=<ledaroot>] [HEADER_COMPAT=<boolean>] configure"])
   AC_MSG_OUT([""])
   AC_MSG_OUT(["where"])
   AC_MSG_OUT([""])
   AC_MSG_OUT(["  <compiler>   is out of {${CXX_FOUND_LIST}},"])
   AC_MSG_OUT(["${CXX2_OUTPUT}\c"])
   AC_MSG_OUT(["  <flags>      are compiler flags of <compiler>,"])
-  AC_MSG_OUT(["  <linkmode>   is out of {'static','shared'} and"])
-  AC_MSG_OUT(["  <ledaroot>   specifies the LEDA installation directory."])
+  AC_MSG_OUT(["  <linkmode>   is out of {'static','shared'},"])
+  AC_MSG_OUT(["  <ledaroot>   specifies the LEDA installation directory and"])
+  AC_MSG_OUT(["  <boolean>    is out of {'yes','no'}."])
   AC_MSG_OUT([""])
   AC_MSG_OUT(["All variables have default values, if not predefined by the user!"])
   AC_MSG_OUT([""])

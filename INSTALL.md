@@ -49,6 +49,16 @@ demo/                     demo programs
 In case you have any problems, try first to go to the confdir directory
 and call "make" and then do the previous steps.
 
+1.1 NOTE FOR LEDA VERSION 5.0 OR LATER
+--------------------------------------
+LEDA 5.0 has a different include structure, which might prevent the LEP
+from beeing compiled. In such a case there is a configure flag HEADER_COMPAT.
+Execute configure as:
+
+LEDAROOT=/path/to/LEDA/5.0 <other options> HEADER_COMPAT=yes configure
+
+and the old style include structure will be compiled as well.
+
 2. COMPILING
 -------------
 
@@ -99,3 +109,5 @@ a) Header Files
    the www server where you obtained this package.
 
    The manual is also contained in the doc directory.	
+
+- Dimitrios Michail 

@@ -10,7 +10,8 @@ include make.lst
 #------------------------------------------------------------------------------
 
 LEP_OBJECTS = $(LEP_SOURCES:.c=.o)
-IFLAGS = -I$(LEP_INCL_PATH) -I$(LEDA_INCL_PATH)
+
+IFLAGS = $(patsubst %,-I%,$(subst :, ,$(LEDA_INCL_PATH))) -I$(LEP_INCL_PATH) 
 CFLAGS = $(CXX_OPT) $(CXX_FLAGS) $(CXX_USER_FLAGS)
 LIB_NAME = lib$(LEP_NAME)$(LIB_SUFFIX)
 
