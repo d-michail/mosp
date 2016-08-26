@@ -1,6 +1,9 @@
 Matchings with One Sided Preferences Library
 --------------------------------------------
 
+This page is the source repository for the package located at
+<a href="https://d-michail.github.io/mosp/">d-michail.github.io/mosp</a>.
+
 This library implements algorithms which compute different
 matchings in bipartite graphs with one sided preferences.
 At this point there are algorithms for two problems: 
