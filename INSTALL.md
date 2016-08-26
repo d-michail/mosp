@@ -51,8 +51,14 @@ and call "make" and then do the previous steps.
 
 1.1 NOTE FOR LEDA VERSION 5.0 OR LATER
 --------------------------------------
-LEDA 5.0 has a different include structure, which might prevent the LEP
-from beeing compiled. In such a case there is a configure flag HEADER_COMPAT.
+Starting from version 5.0, LEDA has a different include structure, which might 
+prevent the LEP from beeing compiled.
+
+The configure script on unix platforms compiles the code with the flag
+LEDA_GE_V5 in case LEDA-5.0 or newer is detected.
+
+For older code there is another alternative, to set HEADER_COMPAT to yes
+when calling configure.
 Execute configure as:
 
 LEDAROOT=/path/to/LEDA/5.0 <other options> HEADER_COMPAT=yes configure

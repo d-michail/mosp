@@ -1,10 +1,14 @@
-dnl    $Id: configure.in,v 1.6 2005/02/22 16:09:53 michail Exp $
+dnl    $Id: configure.in,v 1.11 2005/04/23 11:45:55 michail Exp $
 dnl
 dnl    Modified for LEDA LEPS by M. Seel
 dnl
+dnl    -- Changed by Dimitrios Michail <michail@mpi-sb.mpg.de> --
 dnl    Modified to support LEDA 5.x and headers compatibility,
 dnl    Fixes on acquiring g++ version number.
-dnl    by Dimitrios Michail
+dnl    Support for CYGWIN_NT-5.x for x > 0 added.
+dnl    Support for flag --disable-checking to compile with LEDA_CHECKING_OFF
+dnl    Support for flag --enable-debug-output to compile with LEP_DEBUG_OUTPUT
+dnl    Support for flag --enable-stats-output to compile with LEP_STATS
 dnl
 dnl    Process this file with autoconf to produce a configure script.
 dnl   
@@ -411,7 +415,7 @@ dnl    determine OS and architecture and all this stuff
 dnl
 
 AC_MSG_CHECKING(your OS)
-OS=`${UNAME} -s`
+OS=`${UNAME} -s|${CUT} -d"." -f1`
 OSREV=`${UNAME} -r`
 OSMAJOR=`${ECHO} $OSREV|${CUT} -d"." -f1`
 
@@ -432,8 +436,8 @@ if test "$OS" = SunOS ; then
 dnl	SOLLIBS="-lsocket -lthread"
 fi
 
-if test "$OS" = Linux -o "$OS" = "CYGWIN_NT-5.0" ; then
-	if test "$OS" = "CYGWIN_NT-5.0" ; then
+if test "$OS" = Linux -o "$OS" = CYGWIN_NT-5 ; then
+	if test "$OS" = CYGWIN_NT-5 ; then
 		OS=Cygwin
 		LEP_WLIBS="-luser32 -lgdi32 -lcomdlg32 -lshell32 -lwsock32"
 	fi
@@ -958,6 +962,7 @@ fi
 
 AC_MSG_CHECKING(LEDA Installation)
 _found_ledaroot="false"
+_found_leda_after_version5="false"
 if test -f "${LEDAROOT}/incl/LEDA/basic.h"; then
   AC_MSG_RESULT([found, v4.5 or older])
   LEDA_INCL_PATH="${LEDAROOT}/incl"
@@ -965,7 +970,9 @@ if test -f "${LEDAROOT}/incl/LEDA/basic.h"; then
 else
     if test -f "${LEDAROOT}/incl/LEDA/system/basic.h"; then
       AC_MSG_RESULT([found, v5.0 or newer])
+      _found_leda_after_version5="true"
       LEDA_INCL_PATH="${LEDAROOT}/incl"
+      CXX_FLAGS="-DLEDA_GE_V5 $CXX_FLAGS"
 
       if test "${HEADER_COMPAT}" = "yes" && test -f "${LEDAROOT}/incl_old/LEDA/basic.h"; then
         AC_MSG_RESULT([enabling header compatibility mode...])
@@ -1098,10 +1105,73 @@ if test "${AROPTS}" = "" ; then
 fi
 
 dnl
-dnl    create files
+dnl Check for LEDA_CHECKING_OFF flag
+	dnl
+AC_MSG_CHECKING([whether to enable checking of preconditions and invariants])
+	AC_ARG_ENABLE(
+			checking,
+			AC_HELP_STRING([--disable-checking],[disable or not checking of preconditions and invariants [[default=no]]]),
+			lep_leda_checking=$enableval,
+			lep_leda_checking=yes
+		     )
+AC_MSG_RESULT($lep_leda_checking)
+
+if test "$lep_leda_checking" = "no"; then
+	CXX_FLAGS="-DLEDA_CHECKING_OFF $CXX_FLAGS"
+fi
+
 dnl
+dnl Check for LEP_DEBUG_OUTPUT flag
+dnl
+AC_MSG_CHECKING([whether to enable the LEP's debug output])
+AC_ARG_ENABLE(
+		debug-output,
+		AC_HELP_STRING([--enable-debug-output],[enable the LEP's debug output [[default=no]]]),
+		lep_debug_output=$enableval,
+		lep_debug_output=no
+	     )
+AC_MSG_RESULT($lep_debug_output)
 
+if test "$lep_debug_output" = "yes"; then
+	CXX_COMP_FLAGS="-DLEP_DEBUG_OUTPUT $CXX_COMP_FLAGS"
+fi
 
+dnl
+dnl Check for enabling statistics output
+dnl
+AC_MSG_CHECKING([whether to enable statistics output])
+	AC_ARG_ENABLE(
+			stats-output,
+			AC_HELP_STRING([--enable-stats-output],[enable the LEP's statistics output [[default=no]]]),
+			lep_stats_output=$enableval,
+			lep_stats_output=no
+		     )
+AC_MSG_RESULT($lep_stats_output)
+
+if test "$lep_stats_output" = "yes"; then
+	CXX_FLAGS="-DLEP_STATS $CXX_FLAGS"
+fi
+
+dnl
+dnl Check whether to disable heuristic for reducing the shortest
+dnl path computations
+dnl
+AC_MSG_CHECKING([whether to try to minimize weights in MWM reduction])
+AC_ARG_ENABLE(
+	      mwm-heuristic,
+	      AC_HELP_STRING([--enable-mwm-heuristic],[enable or not the heuristic for reducing the weights in the MWM reduction [[default=no]]]),
+	      rank_lep_mwm_heuristic=$enableval,
+	      rank_lep_mwm_heuristic=no
+	      )
+AC_MSG_RESULT($rank_lep_mwm_heuristic)
+
+if test "$rank_lep_mwm_heuristic" = "yes"; then
+    CXX_FLAGS="-DRANK_LEP_MWM_HEURISTIC $CXX_FLAGS"
+fi
+
+dnl
+dnl create files
+dnl
 AC_OUTPUT([
 	make.config:confdir/make.config.in
 	confdir/make.general:confdir/make.general.in
@@ -1124,6 +1194,9 @@ dnl else
   AC_MSG_OUT(["linking mode         :     LINKING_MODE = '${LINKING_MODE}'"])
   AC_MSG_OUT(["LEDA root dir        :     LEDAROOT = '${LEDAROOT}'"])
   AC_MSG_OUT(["Header compatibility :     HEADER_COMPAT = '${HEADER_COMPAT}'"])
+  AC_MSG_OUT(["Preconditions' checks:     ${lep_leda_checking}"])
+  AC_MSG_OUT(["Debugging output     :     ${lep_debug_output}"])
+  AC_MSG_OUT(["Statistics output    :     ${lep_stats_output}"])
   AC_MSG_OUT([""])
   AC_MSG_OUT(["The following default compiler commands can be choosen by setting CXX2:"])
   AC_MSG_OUT(["${CXX2_OUTPUT2}"])
@@ -1143,6 +1216,12 @@ dnl else
   AC_MSG_OUT(["  <boolean>    is out of {'yes','no'}."])
   AC_MSG_OUT([""])
   AC_MSG_OUT(["All variables have default values, if not predefined by the user!"])
+  AC_MSG_OUT([""])
+  AC_MSG_OUT(["Configure accepts also the following options:"])
+  AC_MSG_OUT([""])
+  AC_MSG_OUT(["--disable-checking     Disable checking of preconditions and invariants"])
+  AC_MSG_OUT(["--enable-debug-output  Enable the LEP's debugging output"])
+  AC_MSG_OUT(["--enable-stats-output  Enable the LEP's statistic output"])
   AC_MSG_OUT([""])
   AC_MSG_OUT([""])
   AC_MSG_OUT(["If the settings are okay, just type"])

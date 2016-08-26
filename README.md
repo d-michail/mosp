@@ -42,5 +42,5 @@ This software is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
-(C) Copyright 2004, Dimitrios Michail <dimitrios.michail@gmail.com>
+(C) Copyright 2004-2005, Dimitrios Michail <dimitrios.michail@gmail.com>
 
