@@ -1,0 +1,7 @@
+<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
+<area shape="rect" id="node1" href="$classmosp_1_1StructuredInstanceGenerator.html" title="An instance generator class. " alt="" coords="5,100,176,141"/>
+<area shape="rect" id="node2" href="$classmosp_1_1FSExponentialInstanceGenerator.html" title="An fixed size &quot;exponential&quot; instance generator. " alt="" coords="236,5,429,47"/>
+<area shape="rect" id="node3" href="$classmosp_1_1HighlyCorrelatedInstanceGenerator.html" title="A highly correlated instance generator. " alt="" coords="230,71,435,112"/>
+<area shape="rect" id="node4" href="$classmosp_1_1RegionalInstanceGenerator.html" title="Regional instance generator. " alt="" coords="224,137,441,163"/>
+<area shape="rect" id="node5" href="$classmosp_1_1VSExponentialInstanceGenerator.html" title="An variable size &quot;exponential&quot; instance generator. " alt="" coords="235,188,430,229"/>
+</map>
