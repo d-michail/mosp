@@ -168,6 +168,10 @@
  *  - Source package (v0.3). [<a href="https://github.com/d-michail/mosp/archive/mosp-0.3.tar.gz">tar.gz</a>]
  *  - Source package (v0.2). [<a href="https://github.com/d-michail/mosp/archive/mosp-0.2.tar.gz">tar.gz</a>]
  *
+ *  \section source_sec Source
+ *
+ *  The repository can be found at <a href="https://github.com/d-michail/mosp">github</a>.
+ *
  *  \section ex_sec Code Examples
  *  \subsection ex_rankmaximal Rank-Maximal Matchings
  *  \code
