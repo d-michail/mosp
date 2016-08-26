@@ -1,3 +1,0 @@
-PROGS = RANK_MAX_TEST RANK_MAX_GML_TEST POPULAR_TEST POPULAR_HC_TEST create-random-compressed-instances rank-maximal-compressed-gml POPULAR_GML mosp_gml POPULAR_VSEXP_TEST gen_gml
-
-
