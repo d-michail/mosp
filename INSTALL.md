@@ -1,6 +1,6 @@
 *******************************************************************************
 *                                                                             *
-*                         Rank Maximal Matchings                              *
+*                            MOSP library                                     *
 *                                                                             *
 *                          UNIX INSTALLATION                                  *
 *                                                                             *
@@ -10,8 +10,8 @@
 In this file I use <LEP> to denote the path name where you have
 extracted the LEP packet. Default is the directory <LEDA>/LEPS right
 below the LEDA main directory. If you have extracted the RMM
-package in that directory the directory <LEP>/rmm (here I use the name 
-rmm for the directory, but it might be something like rmm-0.1 based on 
+package in that directory the directory <LEP>/mosp (here I use the name 
+mosp for the directory, but it might be something like libmosp-0.1 based on 
 the version of the package) should contain the following files and 
 subdirectories:
 
@@ -32,7 +32,7 @@ demo/                     demo programs
 1. CONFIGURATION
 ----------------
 
-   a)  Go to the directory <LEP>/rmm
+   a)  Go to the directory <LEP>/mosp
 
    b)  Type: configure
 
@@ -77,25 +77,25 @@ and the old style include structure will be compiled as well.
 a) Header Files
   
    All LEDA header files are contained in "<LEDA>/incl/LEDA".
-   All LEP header files are contained in "<LEP>/rmm/incl"
+   All LEP header files are contained in "<LEP>/mosp/incl"
 
    You can also copy the include files into one of the global
    include directories, e.g.:
 
-   AT&T CC:  cp -r <LEP>/rmm/incl /usr/include/CC
+   AT&T CC:  cp -r <LEP>/mosp/incl /usr/include/CC
 
-   GNU g++:  cp -r <LEP>/rmm/incl /usr/local/lib/g++-include     
+   GNU g++:  cp -r <LEP>/mosp/incl /usr/local/lib/g++-include     
 
    Or you can use the -I flag of the compiler as described below:
 
-   CC (g++) -I<LEDA>/incl -I<LEP>/rmm/incl \
+   CC (g++) -I<LEDA>/incl -I<LEP>/mosp/incl \
             -L<LEDA> ...
 
    If you have access to the LEDA installation tree and you extracted
-   the LEP rmm inside the directory <LEDA>/LEPS you can copy
+   the LEP mosp inside the directory <LEDA>/LEPS you can copy
    the header files to the default include path 
 
-   <LEDA>/incl/LEP/rmm
+   <LEDA>/incl/LEP/mosp
 
    by the command
 
@@ -106,7 +106,19 @@ a) Header Files
 
    CC (g++) -I<LEDA>/incl -L<LEDA> ...
 
+4. Template Makefile
+--------------------
 
+After compiling the LEP you can find in LEP/mosp/doc/makefiles a template
+makefile for compiling programs using the same flags.
+
+Simply copy the makefile to the directory containing your source.
+You must then open the makefile and change two things: a) the variable
+PROGS must contain the names of the programs that you want to build,
+b) the makefile has to include the file make.config located in the
+root directory of the LEP.
+
+Details are also contained inside the makefile.
 
 5. USER MANUAL
 --------------
@@ -161,7 +173,7 @@ b) Setting the Environment Variables for Borland C++:
       -L"c:\borland\bcc55\lib" -L"c:\borland\bcc55\lib\PSDK"
       to ilink32.cfg.
 
-c) Go to the <LEP>/rmm directory and execute make_bcc_static.bat
+c) Go to the <LEP>/mosp directory and execute make_bcc_static.bat
    To clean the sources run 
    
    make allclean
@@ -172,9 +184,9 @@ c) Go to the <LEP>/rmm directory and execute make_bcc_static.bat
 
 d) To compile your program use something like
 
-   bcc32 -P -I<LEP>/rmm/incl -I%LEDAROOT%/incl \
-            -L<LEP>/rmm -L%LEDAROOT% \
-			yoursource.c librmm.lib libg.lib libl.lib ...
+   bcc32 -P -I<LEP>/mosp/incl -I%LEDAROOT%/incl \
+            -L<LEP>/mosp -L%LEDAROOT% \
+			yoursource.c libmosp.lib libg.lib libl.lib ...
 
 7. WINDOWS - BORLAND C++ BCC32 (DYNAMIC)
 ----------------------------------------
@@ -209,7 +221,7 @@ b) Setting the Environment Variables for Borland C++:
       -L"c:\borland\bcc55\lib" -L"c:\borland\bcc55\lib\PSDK"
       to ilink32.cfg.
 
-c) Go to the <LEP>/rmm directory and execute make_bcc_dll.bat
+c) Go to the <LEP>/mosp directory and execute make_bcc_dll.bat
    To clean the sources run 
    
    make allclean
@@ -220,9 +232,53 @@ c) Go to the <LEP>/rmm directory and execute make_bcc_dll.bat
 
 d) To compile your program use something like
 
-   bcc32 -P -DLEDA_DLL -I<LEP>/rmm/incl -I%LEDAROOT%/incl \
-         -L<LEP>/rmm -L%LEDAROOT% \
-	  yoursource.c librmm.lib leda.lib
+   bcc32 -P -DLEDA_DLL -I<LEP>/mosp/incl -I%LEDAROOT%/incl \
+         -L<LEP>/mosp -L%LEDAROOT% \
+	  yoursource.c libmosp.lib leda.lib
+
+8. Optimization Options and Configuration - IMPORTANT
+-----------------------------------------------------
+
+8.1 GCC and LEDA
+----------------
+
+If you are using GCC version 3.4 or newer in combination with LEDA 5.0.1
+or older do not use the code with the following optimization flags
+
+-fschedule-insns
+-fschedule-insns2
+
+at the author's PC, the resulting code contains a memory leak.
+This is due to incompatibility between GCC and LEDA's memory manager.
+
+Note that the flags -O2 and -O3 use these optimization flags
+and therefore the flags -fno-schedule-insns and -fno-schedule-insns2
+must also be used. The configure script automatically enables these
+if required.
+
+Moreover, when using GCC 4.x and LEDA do not use strict aliasing, again
+in the author's machine unpredictable results occur. The configure script
+automatically enables the option -fno-strict-aliasing if this scenario is
+detected.
+
+8.2 Checking Disabled
+---------------------
+
+The configure script offers a flag
+
+--disable-checking
+
+which compiles the LEP, with any internal check disabled
+by adding the flag -DLEDA_CHECKING_OFF, the same flag
+that LEDA uses to disable any preconditions' or invariants'
+checking.
+
+Note that no check is performed in such a case.
+
+8.3 Configuration Flags
+-----------------------
+
+All configuration flags are contained in the header file config.h .
 
 
 - Dimitrios Michail 

@@ -1,4 +1,4 @@
-LEPNAME = rmm
+LEPNAME = mosp
 LEDALIBS = leda.lib libGeoW.lib
 WINLIBS =
 LEDAFLAGS = -DLEDA_DLL

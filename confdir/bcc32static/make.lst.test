@@ -1,8 +1,8 @@
-LEPNAME = rmm
+LEPNAME = mosp
 LEDALIBS = libg.lib libl.lib
 WINLIBS = 
 LEDAFLAGS = 
-PROGS = RANK_MAX_TEST.exe
+PROGS = RANK_MAX_TEST.exe create-random-compressed-instances.exe rank-maximal-compressed-gml.exe
 
 
 

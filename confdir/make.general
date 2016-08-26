@@ -14,5 +14,5 @@ AROPTS = cru
 SOCKET_LIBS =  
 RFLAG =  -Xlinker -rpath -Xlinker 
 
-LEP_NAME = rmm
-LEP_PATH_NAME = rmm
+LEP_NAME = mosp
+LEP_PATH_NAME = mosp

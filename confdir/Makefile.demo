@@ -16,7 +16,7 @@ LFLAGS = -L$(LEDA_LIB_PATH) -L$(LEP_LIB_PATH)
 RFLAGS = $(RFLAG)$(LEDA_LIB_PATH) $(RFLAG)$(LEP_LIB_PATH)
 CFLAGS = $(CXX_OPT) $(CXX_FLAGS) $(CXX_USER_FLAGS)
 LIB_NAME = lib$(LEP_NAME)$(LIB_SUFFIX)
-LIBS = -l$(LEP_NAME) $(LEP_LIBS) -lW $(LEP_WLIBS) -lP -lG -lL -lm $(SOCKET_LIBS)
+LIBS = -l$(LEP_NAME) $(LEP_LIBS) $(LEP_WLIBS) $(LEDA_LIBS) $(SOCKET_LIBS)
 
 all: $(PROGS)
 
@@ -26,15 +26,23 @@ all: $(PROGS)
 # general rules:
 #----------------------------------------------------------------------------
 
-.c.o:
-	$(CXX) $(IFLAGS) $(CFLAGS) $(LEP_COMP_FLAGS) -c $*.c        
+.C.o:
+	$(CXX) $(IFLAGS) $(CFLAGS) $(LEP_COMP_FLAGS) -c $*.C        
 
-.c:
-	$(CXX) $(IFLAGS) $(CFLAGS) $(LEP_COMP_FLAGS) -c $*.c
+.C:
+	$(CXX) $(IFLAGS) $(CFLAGS) $(LEP_COMP_FLAGS) -c $*.C
 	$(CXX) $(LEP_LINK_FLAGS) -o $* $*.o $(LFLAGS) $(RFLAGS) $(LIBS)
 
 .o:
 	$(CXX) $(LEP_LINK_FLAGS) -o $* $*.o $(LFLAGS) $(RFLAGS) $(LIBS)
+
+#----------------------------------------------------------------------------
+# depend:
+#----------------------------------------------------------------------------
+
+depend:
+	makedepend -- $(CFLAGS) -I$(LEP_INCL_PATH) -- $(LEP_SOURCES) 2>/dev/null
+
 
 #----------------------------------------------------------------------------
 # clean and touch
@@ -48,4 +56,4 @@ clean:
 	$(RM) -f *.o *~ core
 
 touch:
-	touch *.c
+	touch *.C

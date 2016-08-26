@@ -5,5 +5,5 @@
 #------------------------------------------------------------------------------
 
 
-LEP_SOURCES = RANK_MAX_MATCHING.c
+LEP_SOURCES = util.C RANK_MAX_MATCHING.C RANK_MAX_CAPACITATED_MATCHING.C POPULAR.C UNPOPULARFACTOR.C UNPOPULARMARGIN.C gml.C instance_generator.C hc_instance_generator.C vsexponential_instance_generator.C popular_clone.C POPULAR_CAPACITATED.C fsexponential_instance_generator.C regional_instance_generator.C
 

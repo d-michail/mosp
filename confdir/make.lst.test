@@ -1,3 +1,3 @@
-PROGS = RANK_MAX_TEST
+PROGS = mosp_gml gen_gml
 
 

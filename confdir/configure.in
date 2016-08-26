@@ -1,14 +1,20 @@
-dnl    $Id: configure.in,v 1.11 2005/04/23 11:45:55 michail Exp $
+dnl    $Id: configure.in,v 1.21 2006/05/12 14:01:57 michail Exp $
 dnl
 dnl    Modified for LEDA LEPS by M. Seel
 dnl
-dnl    -- Changed by Dimitrios Michail <michail@mpi-sb.mpg.de> --
+dnl    -- Changed by Dimitrios Michail <dimitrios.michail@gmail.com> --
 dnl    Modified to support LEDA 5.x and headers compatibility,
 dnl    Fixes on acquiring g++ version number.
 dnl    Support for CYGWIN_NT-5.x for x > 0 added.
+dnl    Support for flag --enable-static-lib to link the LEP statically
 dnl    Support for flag --disable-checking to compile with LEDA_CHECKING_OFF
 dnl    Support for flag --enable-debug-output to compile with LEP_DEBUG_OUTPUT
 dnl    Support for flag --enable-stats-output to compile with LEP_STATS
+dnl
+dnl    If LEDA 5.0 or newer is detected the code is compiled with the
+dnl    -DLEDA_GE_V5 flag.
+dnl
+dnl    Support for checking compatibility between GCC version and LEDA's version.
 dnl
 dnl    Process this file with autoconf to produce a configure script.
 dnl   
@@ -24,6 +30,8 @@ dnl    some initialization stuff...
 dnl 
 
 AC_INIT(confdir/make.config.in)
+AC_CONFIG_HEADERS(incl/LEP/mosp/config.h)
+AC_PREREQ(2.50)
 
 dnl not used anymore, all output in make.general and make.config
 dnl AC_CONFIG_HEADER([
@@ -58,6 +66,7 @@ AC_SUBST(LEP_LIB_PATH)  dnl directory of LEP libraries
 AC_SUBST(LEDAROOT)      dnl root directory of LEDA
 AC_SUBST(LEDA_INCL_PATH)    dnl directory of LEDA include files
 AC_SUBST(LEDA_LIB_PATH)     dnl directory of LEDA libraries
+AC_SUBST(LEDA_LIBS)         dnl libraries for LEDA
 AC_SUBST(CXX)               dnl C++ compiler (absolute path)
 AC_SUBST(CXX_FLAGS)         dnl C++ compiler flags
 AC_SUBST(CXX_USER_FLAGS)    dnl C++ compiler flags
@@ -82,11 +91,14 @@ AC_SUBST(CP)
 AC_SUBST(MKDIR)
 AC_SUBST(AR)
 AC_SUBST(AROPTS)
+AC_SUBST(CTAGS)
+AC_SUBST(ETAGS)
 
 dnl LEP specific constant variables replaced in make.general
 
 AC_SUBST(LEP_NAME)
 AC_SUBST(LEP_PATH_NAME)
+AC_SUBST(LEP_VERSION)
 
 dnl not defined
 
@@ -179,6 +191,17 @@ AC_DEFUN(AC_MSG_PATH_PROG,[
     exit
   fi
 ])
+
+dnl
+dnl Doxygen
+dnl
+AC_PATH_PROG(DOT, dot)
+if test "$DOT" != ""; then
+    HAVE_DOT=YES
+else
+    HAVE_DOT=NO
+fi
+AC_SUBST(HAVE_DOT)
 
 dnl
 dnl    define macro to search for header files that may be somewhere in the filesystem
@@ -357,29 +380,22 @@ AC_DEFUN(AC_FIND_LIB,[
 
 	$1="${_LIBS}"
 ])
-	
 
-dnl --------------------------------------------------------------------------------
-dnl		Perl Config Section (not used anymore)
-dnl --------------------------------------------------------------------------------
-
-dnl if test "${CONFIGURE}" = "" ; then
-dnl   CONFIGURE="menu"
-dnl fi
-dnl if test "${CONFIGURE}" = "menu" ; then
-dnl   ${ECHO} ">>Menu Configuration<<"
-dnl   AC_PATH_PROG(PERL,perl,no)
-dnl   AC_MSG_CHECKING([perl/Tk])
-dnl   if test "${PERL}" != "no" 
-dnl   then
-dnl     if ${PERL} -e 'use Tk' > /dev/null; then
-dnl       AC_MSG_RESULT(ok)
-dnl     else
-dnl       AC_MSG_RESULT([no, using scriptconfig])
-dnl       CONFIGURE="script"
-dnl     fi
-dnl   fi
-dnl fi
+dnl    define a macro to determine LEDA's version
+dnl    syntax: AC_LEDA_VERSION(<answer>)
+dnl
+AC_DEFUN(AC_LEDA_VERSION,[	
+    AC_MSG_CHECKING(exact LEDA version as reported in header files)
+    if test -f "${LEDAROOT}/incl/LEDA/basic.h"; then
+	_LEDA_VERSION=`grep __LEDA__ ${LEDAROOT}/incl/LEDA/basic.h | cut -f 3 -d' '`
+    elif test -f "${LEDAROOT}/incl/LEDA/system/basic.h"; then
+	_LEDA_VERSION=`grep __LEDA__ ${LEDAROOT}/incl/LEDA/system/basic.h | cut -f 3 -d' '`
+    else 
+	_LEDA_VERSION="none"
+    fi
+    AC_MSG_RESULT(${_LEDA_VERSION})
+    $1=${_LEDA_VERSION}
+]) dnl  END of AC_LEDA_VERSION
 
 
 dnl --------------------------------------------------------------------------------
@@ -408,6 +424,25 @@ AC_MSG_PATH_PROG(SED,sed,no)
 AC_MSG_PATH_PROG(FIND,find,no)
 AC_MSG_PATH_PROG(MAKE,make,no)
 AC_PROG_LN_S
+AC_PATH_PROG(CTAGS,ctags,)
+AC_PATH_PROG(ETAGS,etags,)
+
+
+dnl  
+dnl Determine LEDA's version
+dnl
+dnl This used to be later on but since LEDA-6.0 we need
+dnl to change the library flags.
+dnl
+${ECHO} ">>LEDA Version Analysis<<"
+AC_LEDA_VERSION(EXACT_LEDA_VERSION)
+if test "${EXACT_LEDA_VERSION}" = "none"; then
+    AC_MSG_RESULT([LEDA not found])
+    AC_MSG_ERROR(aborted)
+    exit
+fi
+LEDA_INCL_PATH="${LEDAROOT}/incl"
+
 
 ${ECHO} ">>Platform Analysis<<"
 dnl
@@ -423,7 +458,12 @@ dnl		default...
 BINFMT="${OS}"
 
 dnl by default use X11 libs
-LEP_WLIBS="-lX11"
+LEP_WLIBS="-lW -lX11"
+LEDA_LIBS="-lP -lG -lL -lm"
+if test "${EXACT_LEDA_VERSION}" -ge 600; then
+        LEP_WLIBS=""
+        LEDA_LIBS="-lX11 -lleda -lm"
+fi
 
 if test "$OS" = SunOS ; then
 	if test "$OSMAJOR" = 5 ; then
@@ -439,7 +479,12 @@ fi
 if test "$OS" = Linux -o "$OS" = CYGWIN_NT-5 ; then
 	if test "$OS" = CYGWIN_NT-5 ; then
 		OS=Cygwin
-		LEP_WLIBS="-luser32 -lgdi32 -lcomdlg32 -lshell32 -lwsock32"
+		if test "${EXACT_LEDA_VERSION}" -ge 600; then
+                        LEP_WLIBS="-luser32 -lgdi32 -lcomdlg32 -lshell32 -lwsock32"
+                        LEDA_LIBS="-lleda -lm"
+                else
+                        LEP_WLIBS="-lW -luser32 -lgdi32 -lcomdlg32 -lshell32 -lwsock32"
+                fi
 	fi
 
 	PROCESSOR=`${UNAME} -m`
@@ -452,6 +497,10 @@ if test "$OS" = Linux -o "$OS" = CYGWIN_NT-5 ; then
 		ARCHITECTURE=i386
 		BINFMT=Linux-i386
 	fi
+    if test "${PROCESSOR}" = x86_64; then
+        ARCHITECTURE=x86_64
+        BINFMT=Linux-x86_64
+    fi
 
 	if test "${ARCHITECTURE}" = "unknown" ; then
 		AC_MSG_RESULT(OS: ${OS} / hardware: ${PROCESSOR})
@@ -481,31 +530,31 @@ fi
 dnl
 dnl 	create OS defines in config.h:
 dnl
-if test "$OS" = Linux ; then
-	AC_DEFINE(LINUX,)
-fi
-if test "$OS" = Solaris ; then
-	AC_DEFINE(SOLARIS,)
-fi
-if test "$OS" = IRIX ; then
-	AC_DEFINE(IRIX,)
-fi
+dnl if test "$OS" = Linux ; then
+dnl 	AC_DEFINE(LINUX,)
+dnl fi
+dnl if test "$OS" = Solaris ; then
+dnl 	AC_DEFINE(SOLARIS,)
+dnl fi
+dnl if test "$OS" = IRIX ; then
+dnl 	AC_DEFINE(IRIX,)
+dnl fi
 
 dnl
 dnl		create ARCHITECTURE defines
 dnl
-if test "$ARCHITECTURE" = sparc ; then
-	AC_DEFINE(SPARC,)
-fi
-if test "$ARCHITECTURE" = i386 ; then
-	AC_DEFINE(I386,)
-fi
-if test "$ARCHITECTURE" = mips ; then
-	AC_DEFINE(MIPS,)
-fi
-if test "$ARCHITECTURE" = alpha ; then
-	AC_DEFINE(ALPHA,)
-fi
+dnl if test "$ARCHITECTURE" = sparc ; then
+dnl	AC_DEFINE(SPARC,)
+dnl fi
+dnl if test "$ARCHITECTURE" = i386 ; then
+dnl 	AC_DEFINE(I386,)
+dnl fi
+dnl if test "$ARCHITECTURE" = mips ; then
+dnl 	AC_DEFINE(MIPS,)
+dnl fi
+dnl if test "$ARCHITECTURE" = alpha ; then
+dnl 	AC_DEFINE(ALPHA,)
+dnl fi
 AC_MSG_RESULT($OS $OSREV (BINFMT=$BINFMT))
 
 
@@ -666,12 +715,171 @@ dnl    CXX_VERSION=`$2 --version`
 
 ]) dnl  END of AC_COMPILER_NAME
 
+
+dnl    define a macro to determine LEDA's version
+dnl    syntax: AC_LEDA_VERSION(<answer>)
+dnl
+AC_DEFUN(AC_LEDA_VERSION,[	
+    AC_MSG_CHECKING(exact LEDA version as reported in header files)
+    if test -f "${LEDAROOT}/incl/LEDA/basic.h"; then
+	_LEDA_VERSION=`grep __LEDA__ ${LEDAROOT}/incl/LEDA/basic.h | cut -f 3 -d' '`
+    elif test -f "${LEDAROOT}/incl/LEDA/system/basic.h"; then
+	_LEDA_VERSION=`grep __LEDA__ ${LEDAROOT}/incl/LEDA/system/basic.h | cut -f 3 -d' '`
+    else 
+	_LEDA_VERSION="none"
+    fi
+    AC_MSG_RESULT(${_LEDA_VERSION})
+    $1=${_LEDA_VERSION}
+]) dnl  END of AC_LEDA_VERSION
+
+dnl
+dnl Check if LEDA and the compiler are compatible
+dnl syntax: AC_LEDA_COMPILER(EXACT_LEDA_VERSION,CXX_STD_NAME,RESULT)
+dnl EXACT_LEDA_VERSION as obtained by AC_LEDA_VERSION
+dnl RESULT is yes,no
+dnl For now if the compiler is not GCC the result is always yes
+dnl CXX_FLAGS is populated with extra options
+dnl
+AC_DEFUN(AC_LEDA_COMPILER,[
+  _CXX_NAME=
+  dnl local name!!!
+  if test "$2" = "" ; then
+    _CXX_NAME=unknown
+  else
+    _CXX_NAME="$2"
+  fi
+
+  while test "`${ECHO} ${_CXX_NAME}|grep /`" != "" ; do
+    _CXX_NAME=`${ECHO} ${_CXX_NAME} | ${CUT} -d/ -f2-`
+  done
+
+  _COMPATIBLE="yes"
+  
+  dnl	Check whether the C++ compiler is a GNU compiler
+
+dnl the following has to go leftpacked
+cat > /tmp/$$.conftest.c << EOF
+#ifdef __GNUC__
+GXX:true
+#else
+GXX:false
+#endif
+EOF
+
+  _IS_GXX=`$2 -E /tmp/$$.conftest.c |egrep GXX|${CUT} -d: -f2|${TR} -d " "`
+  dnl rm -f /tmp/$$.conftest.c
+  if test "${_IS_GXX}" = "true" ; then
+    _CXX_NAME="g++"
+
+  dnl
+  dnl  Try to find out the exact compiler release on different
+  dnl  operating systems and differntiate between gcc/egcs
+  dnl
+
+    _CXX_VERSION=`$2 -v 2>&1 | grep "gcc version" | ${CUT} -d' ' -f3`
+    _CXX_COMPILER_NAME="g++"
+    _VERSION_OUTPUT="g++ ${_CXX_VERSION}"
+    _IS_EGXX=false
+
+    _CXX_VERSION_1=`${ECHO} ${_CXX_VERSION} | ${CUT} -d. -f1`
+    _CXX_VERSION_2=`${ECHO} ${_CXX_VERSION} | ${CUT} -d. -f2`
+    _CXX_VERSION_3=`${ECHO} ${_CXX_VERSION} | ${CUT} -d. -f3`
+    
+    if test "${_CXX_VERSION_1}" -eq 2 -a "${_CXX_VERSION_2}" -eq 95 ; then
+	if test "$1" -ge 450; then 
+	    _COMPATIBLE="no"
+	fi
+    fi
+ 
+    _add_permissive="no"
+    _disable_scheduling="no"
+    _no_strict_aliasing="no"
+
+    dnl g++ 3.3.5 and 3.4.x and LEDA before 5.01 
+    if test "${_CXX_VERSION_1}" -eq 3 && 
+       ( test "${_CXX_VERSION_2}" -ge 4 || 
+       ( test "${_CXX_VERSION_2}" -eq 3 && 
+         test "${_CXX_VERSION_3}" -ge 5 ) ) &&
+         test "$1" -le 501; then
+       _disable_scheduling="yes"
+    fi
+
+    dnl g++ 4.x and LEDA before 5.01
+    if test "${_CXX_VERSION_1}" -ge 4; then 
+      dnl opt scheduling problem was fixed on LEDA v5.01
+      if test "$1" -le 500; then 
+        _disable_scheduling="yes"
+      fi
+      dnl there seems to be a problem with -fstrict-aliasing
+      _no_strict_aliasing="yes"
+      dnl if less that LEDA v5.0 forget it, skiplist does not work
+      if test "$1" -le 500; then 
+        _COMPATIBLE="no"
+      fi
+    fi
+
+    if test "${_CXX_VERSION_1}" -eq 3 &&
+       test "${_CXX_VERSION_2}" -ge 4 && 
+       test "$1" -le 450; then
+       _add_permissive="yes"
+    fi
+
+    AC_MSG_CHECKING(whether ${_CXX_NAME} requires -fpermissive flag)
+    if test "$_add_permissive" = "yes"; then
+      CXX_FLAGS="-fpermissive $CXX_FLAGS"
+      AC_DEL_SPACES(CXX_FLAGS,${CXX_FLAGS})
+    fi
+    AC_MSG_RESULT(${_add_permissive})
+
+    AC_MSG_CHECKING(whether instruction scheduling should be disabled)
+    if test "$_disable_scheduling" = "yes"; then 
+      CXX_FLAGS="-fno-schedule-insns -fno-schedule-insns2 $CXX_FLAGS"
+      AC_DEL_SPACES(CXX_FLAGS,${CXX_FLAGS})
+    fi
+    AC_MSG_RESULT(${_disable_scheduling})
+
+    AC_MSG_CHECKING(whether strict aliasing should be disabled)
+    if test "$_no_strict_aliasing" = "yes"; then
+      CXX_FLAGS="-fno-strict-aliasing $CXX_FLAGS"
+      AC_DEL_SPACES(CXX_FLAGS,${CXX_FLAGS})
+    fi
+    AC_MSG_RESULT(${_no_strict_aliasing})
+
+  fi
+
+  dnl if LEDA v5.0 or newer add appropriate flag
+  AC_MSG_CHECKING(for LEDA v5.0 or newer include structure)
+  if test "$1" -ge 500; then
+    AC_DEFINE(LEDA_GE_V5,1,"Whether LEDA v5.0 or newer is used")
+    AC_MSG_RESULT(yes)
+  else
+    AC_MSG_RESULT(no)
+  fi
+
+  dnl add also -Wall flag
+  CXX_FLAGS="-Wall $CXX_FLAGS"
+  AC_DEL_SPACES(CXX_FLAGS,${CXX_FLAGS})
+  
+  AC_MSG_CHECKING(whether ${_CXX_NAME} is compatible with particular LEDA)
+  AC_MSG_RESULT(${_COMPATIBLE})
+  $3=${_COMPATIBLE}
+])
+
 dnl -------------------------------------------------------------------
 dnl
 dnl 	shared/static libs ?
 dnl
 
 AC_MSG_CHECKING(whether to build shared libraries)
+AC_ARG_ENABLE(
+	static-lib,
+	AC_HELP_STRING([--enable-static-lib],[build the LEP as static library [[default=no]]]),
+	lep_build_static=$enableval,
+	lep_build_static=no
+)
+if test "$lep_build_static" = "yes"; then
+	LINKING_MODE="static"
+fi
 if test "${LINKING_MODE}" != "static" -a "$OS" != Cygwin; then
   LINKING_MODE="shared"
   AC_MSG_RESULT(yes)
@@ -679,21 +887,6 @@ else
   LINKING_MODE="static"
   AC_MSG_RESULT(no)
 fi
-
-dnl -------------------------------------------------------------------
-dnl
-dnl 	header compatibility mode?
-dnl
-
-AC_MSG_CHECKING(whether to enable header compatibility mode)
-if test "${HEADER_COMPAT}" != "yes"; then
-  HEADER_COMPAT="no";
-  AC_MSG_RESULT(no)
-else
-  HEADER_COMPAT="yes";
-  AC_MSG_RESULT(yes)
-fi
-
 
 dnl --------------------------------------------------------------------
 dnl
@@ -892,6 +1085,13 @@ dnl
 
 AC_MSG_CHECKING(compiler flags to build ${LINKING_MODE} libraries with ${CXX_STD_NAME} on ${OS})
 tableline=`grep "${OS}" confdir/flagtable | grep "${LINKING_MODE}" | grep " ${CXX_STD_NAME}" | grep ${CXX2}`
+
+dnl if not found in flagtable, try to see if its something like g++-version instead of g++
+if test "${tableline}" = "" && test "${IS_GXX}" = "true"; then 
+    #CXX_STD_NAME=`echo ${CXX_STD_NAME} | cut -d- -f 1`
+    tableline=`grep "${OS}" confdir/flagtable | grep "${LINKING_MODE}" | grep " g++" | grep ${CXX2}`
+fi
+
 CXX2_COMMAND=`${ECHO} ${tableline} | cut -d, -f5`
 CXX_COMP_FLAGS=`${ECHO} ${tableline} | cut -d, -f6`
 CXX_LIB_FLAGS=`${ECHO} ${tableline} | cut -d, -f7`
@@ -943,8 +1143,14 @@ dnl
 dnl !!! these to variables have to be set by the LEP designer
 dnl 
 
-LEP_NAME="rmm"
-LEP_PATH_NAME="rmm"
+LEP_NAME="mosp"
+LEP_PATH_NAME="mosp"
+LEP_VERSION="0.7"
+AC_DEFINE_UNQUOTED(PACKAGE_VERSION,"${LEP_VERSION}")
+AC_DEFINE(PACKAGE_BUGREPORT,"Dimitrios Michail <dimitrios.michail@gmail.com>")
+AC_DEFINE_UNQUOTED(PACKAGE_TARNAME,"${LEP_NAME}lep-${LEP_VERSION}")
+AC_DEFINE(PACKAGE_NAME,"libMOSP LEDA Extension Package")
+AC_DEFINE_UNQUOTED(PACKAGE_STRING,"libMOSP LEDA Extension Package v${LEP_VERSION}")
 
 ${ECHO} ">>LEP Requirements<<"
 dnl
@@ -957,39 +1163,51 @@ LEP_INCL_PATH="${LEPROOT}/incl"
 if test "${LINKING_MODE}" = "shared" ; then
   LEP_LIB_PATH="${LEPROOT}"
 else
-  LEP_LIB_PATH="${LEPROOT}/static"
+  if test -d "${LEPROOT}/static"; then
+    LEP_LIB_PATH="${LEPROOT}/static"
+  else
+    LEP_LIB_PATH="${LEPROOT}"
+  fi  
 fi
 
-AC_MSG_CHECKING(LEDA Installation)
-_found_ledaroot="false"
-_found_leda_after_version5="false"
-if test -f "${LEDAROOT}/incl/LEDA/basic.h"; then
-  AC_MSG_RESULT([found, v4.5 or older])
-  LEDA_INCL_PATH="${LEDAROOT}/incl"
-  _found_ledaroot="true"
-else
-    if test -f "${LEDAROOT}/incl/LEDA/system/basic.h"; then
-      AC_MSG_RESULT([found, v5.0 or newer])
-      _found_leda_after_version5="true"
-      LEDA_INCL_PATH="${LEDAROOT}/incl"
-      CXX_FLAGS="-DLEDA_GE_V5 $CXX_FLAGS"
+dnl
+dnl Check for compatibility problems with compiler
+dnl
+AC_LEDA_COMPILER(${EXACT_LEDA_VERSION},${CXX_STD_NAME},_leda_compatible)
+if test "$_leda_compatible" = "no"; then 
+    AC_MSG_RESULT([LEDA version ${EXACT_LEDA_VERSION} not compatible with ${CXX_STD_NAME}])
+    AC_MSG_ERROR(aborted)
+    exit
+fi
 
-      if test "${HEADER_COMPAT}" = "yes" && test -f "${LEDAROOT}/incl_old/LEDA/basic.h"; then
-        AC_MSG_RESULT([enabling header compatibility mode...])
-        LEDA_INCL_PATH="$LEDA_INCL_PATH ${LEDAROOT}/incl_old"
-      fi
-      _found_ledaroot="true"
+dnl
+dnl Enable or not "header compatibility mode"?
+dnl
+AC_MSG_CHECKING(whether to enable header compatibility mode)
+if test "${EXACT_LEDA_VERSION}" -ge 500 && test "${EXACT_LEDA_VERSION}" -lt 600 && test "${HEADER_COMPAT}" = "yes"; then
+    AC_MSG_RESULT(yes)
+    LEDA_INCL_PATH="$LEDA_INCL_PATH ${LEDAROOT}/incl_old"
+    AC_DEL_SPACES(LEDA_INCL_PATH,${LEDA_INCL_PATH})
+else
+    AC_MSG_RESULT(no)
+fi
+
+dnl
+dnl Shared or static build?
+dnl
+if test "${LINKING_MODE}" = "shared" ; then
+    LEDA_LIB_PATH="${LEDAROOT}"
+else
+    if test -d "${LEDAROOT}/static"; then
+	LEDA_LIB_PATH="${LEDAROOT}/static"
     else
-      AC_MSG_ERROR([LEDAROOT not defined!])
+	LEDA_LIB_PATH="${LEDAROOT}"
     fi
 fi
 
-if test "$_found_ledaroot" = "true"; then 
-  if test "${LINKING_MODE}" = "shared" ; then
-    LEDA_LIB_PATH="${LEDAROOT}"
-  else
-    LEDA_LIB_PATH="${LEDAROOT}/static"
-  fi
+dnl enable LEDA's template compare function
+if test "${EXACT_LEDA_VERSION}" -lt 600; then
+        AC_DEFINE(LEDA_COMPARE_TEMPLATE,1,Whether LEDA should define a template compare function)
 fi
 
 AC_CHECK_HEADER(assert.h)
@@ -1010,6 +1228,12 @@ dnl ------------------------------------------------------------
 
 AC_MSG_CHECKING(Additional compiler and linker flags and libraries)
 tableline=`grep "${OS}" confdir/userflagtable | grep ${LINKING_MODE} | grep " ${CXX_STD_NAME}"`
+
+dnl if not found in userflagtable, try to see if its something like g++-version instead of g++
+if test "${tableline}" = "" && test "${IS_GXX}" = "true"; then 
+    #CXX_STD_NAME=`echo ${CXX_STD_NAME} | cut -d- -f 1`
+    tableline=`grep "${OS}" confdir/userflagtable | grep "${LINKING_MODE}" | grep " g++"`
+fi
 
 LEP_COMP_FLAGS=`${ECHO} ${tableline} | cut -d, -f4`
 AC_DEL_SPACES(LEP_COMP_FLAGS,${LEP_COMP_FLAGS})
@@ -1104,9 +1328,10 @@ if test "${AROPTS}" = "" ; then
   AROPTS="cru"
 fi
 
+${ECHO} ">>LEP's extra requested flags<<"
 dnl
 dnl Check for LEDA_CHECKING_OFF flag
-	dnl
+dnl
 AC_MSG_CHECKING([whether to enable checking of preconditions and invariants])
 	AC_ARG_ENABLE(
 			checking,
@@ -1117,7 +1342,7 @@ AC_MSG_CHECKING([whether to enable checking of preconditions and invariants])
 AC_MSG_RESULT($lep_leda_checking)
 
 if test "$lep_leda_checking" = "no"; then
-	CXX_FLAGS="-DLEDA_CHECKING_OFF $CXX_FLAGS"
+    AC_DEFINE(LEDA_CHECKING_OFF,1,"Whether to disable all preconditions checks of LEP and LEDA")
 fi
 
 dnl
@@ -1133,7 +1358,26 @@ AC_ARG_ENABLE(
 AC_MSG_RESULT($lep_debug_output)
 
 if test "$lep_debug_output" = "yes"; then
-	CXX_COMP_FLAGS="-DLEP_DEBUG_OUTPUT $CXX_COMP_FLAGS"
+	AC_DEFINE(LEP_DEBUG_OUTPUT,1,"Whether to enable debugging output")
+fi
+
+dnl
+dnl Check for adding -g option
+dnl
+AC_MSG_CHECKING([whether to add debugging symbols])
+AC_ARG_ENABLE(
+    debug-flags,
+    AC_HELP_STRING([--enable-debug-flags],[enable debugging symbols [[default=no]]]),
+    lep_debug_flags=$enableval,
+    lep_debug_flags=no
+    )
+AC_MSG_RESULT($lep_debug_flags)
+
+if test "$lep_debug_flags" = "yes"; then
+    CXX_FLAGS="-g $CXX_FLAGS"
+    AC_DEL_SPACES(CXX_FLAGS,${CXX_FLAGS})
+else
+    AC_DEFINE(NDEBUG,1,"Whether to disable any debugging flags")
 fi
 
 dnl
@@ -1150,8 +1394,11 @@ AC_MSG_RESULT($lep_stats_output)
 
 if test "$lep_stats_output" = "yes"; then
 	CXX_FLAGS="-DLEP_STATS $CXX_FLAGS"
+	AC_DEFINE(LEP_STATS,1,"Whether to output statistic information")
 fi
 
+
+${ECHO} ">>Particular LEP's Checks<<"
 dnl
 dnl Check whether to disable heuristic for reducing the shortest
 dnl path computations
@@ -1166,7 +1413,7 @@ AC_ARG_ENABLE(
 AC_MSG_RESULT($rank_lep_mwm_heuristic)
 
 if test "$rank_lep_mwm_heuristic" = "yes"; then
-    CXX_FLAGS="-DRANK_LEP_MWM_HEURISTIC $CXX_FLAGS"
+    AC_DEFINE(RANK_LEP_MWM_HEURISTIC,1,"Whether to enable the MWM heuristic")
 fi
 
 dnl
@@ -1175,6 +1422,7 @@ dnl
 AC_OUTPUT([
 	make.config:confdir/make.config.in
 	confdir/make.general:confdir/make.general.in
+	doc/doxygen/Doxyfile
 ])
 
 
@@ -1219,6 +1467,7 @@ dnl else
   AC_MSG_OUT([""])
   AC_MSG_OUT(["Configure accepts also the following options:"])
   AC_MSG_OUT([""])
+  AC_MSG_OUT(["--enable-static-lib    Build the LEP as static library"])
   AC_MSG_OUT(["--disable-checking     Disable checking of preconditions and invariants"])
   AC_MSG_OUT(["--enable-debug-output  Enable the LEP's debugging output"])
   AC_MSG_OUT(["--enable-stats-output  Enable the LEP's statistic output"])

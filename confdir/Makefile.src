@@ -5,11 +5,19 @@
 include ../make.config
 include make.lst
 
+ifdef ETAGS
+    ETAGFILES = $(shell find . -name "*.[Cch]" | grep -v /CVS/)
+endif
+ifdef CTAGS
+    CTAGFILES = $(shell find . -name "*.[Cch]" | grep -v /CVS/)
+endif
+
+
 #------------------------------------------------------------------------------
 # General settings
 #------------------------------------------------------------------------------
 
-LEP_OBJECTS = $(LEP_SOURCES:.c=.o)
+LEP_OBJECTS = $(LEP_SOURCES:.C=.o)
 
 IFLAGS = $(patsubst %,-I%,$(subst :, ,$(LEDA_INCL_PATH))) -I$(LEP_INCL_PATH) 
 CFLAGS = $(CXX_OPT) $(CXX_FLAGS) $(CXX_USER_FLAGS)
@@ -27,21 +35,26 @@ all: $(LINKING_MODE)
 shared: $(LEP_OBJECTS)
 	$(CXX) $(CXX_LIB_FLAGS) $(LEP_LIB_FLAGS) -o $(LIB_NAME) $(LEP_OBJECTS)
 	@$(MV) $(LIB_NAME) $(LEP_LIB_PATH)
-	@$(RM) -f $(LEP_OBJECTS)
 
 static: $(LEP_OBJECTS)
 	$(AR) $(AROPTS) $(LIB_NAME) $?
 	@if [ ! -d $(LEP_LIB_PATH) ]; then \
 	$(MKDIR) $(LEP_LIB_PATH); fi
 	@$(MV) $(LIB_NAME) $(LEP_LIB_PATH)
-	@$(RM) -f $(LEP_OBJECTS)
 
 #----------------------------------------------------------------------------
 # general rules:
 #----------------------------------------------------------------------------
 
-.c.o:
-	$(CXX) $(IFLAGS) $(CFLAGS) $(CXX_COMP_FLAGS) $(LEP_COMP_FLAGS) -c $*.c        
+.C.o:
+	$(CXX) $(IFLAGS) $(CFLAGS) $(CXX_COMP_FLAGS) $(LEP_COMP_FLAGS) -c $*.C        
+
+#----------------------------------------------------------------------------
+# depend:
+#----------------------------------------------------------------------------
+
+depend:
+	makedepend -- $(CFLAGS) -I$(LEP_INCL_PATH) -- $(LEP_SOURCES) 2>/dev/null
 
 #----------------------------------------------------------------------------
 # clean and touch
@@ -55,4 +68,10 @@ clean :
 	$(RM) -f $(LEP_OBJECTS)
 
 touch: 
-	touch *.c
+	touch *.C
+
+tags: $(CTAGFILES)
+	$(CTAGS) $(CTAGFILES)
+
+TAGS: $(ETAGFILES)
+	$(ETAGS) $(ETAGFILES)

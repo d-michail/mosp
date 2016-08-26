@@ -5,6 +5,6 @@
 #------------------------------------------------------------------------------
 
 
-LEPNAME = rmm
-LEP_SOURCES = RANK_MAX_MATCHING.c
+LEPNAME = mosp
+LEP_SOURCES = RANK_MAX_MATCHING.C
 
