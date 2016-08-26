@@ -162,11 +162,11 @@
  *
  *  \section down_sec Download
  *
- *  - Source package (v0.7). [<a href="archive/mosp-0.7.tar.gz">tar.gz</a>]
- *  - Source package (v0.6). [<a href="archive/mosp-0.6.tar.gz">tar.gz</a>]
- *  - Source package (v0.5). [<a href="archive/mosp-0.5.tar.gz">tar.gz</a>]
- *  - Source package (v0.3). [<a href="archive/mosp-0.3.tar.gz">tar.gz</a>]
- *  - Source package (v0.2). [<a href="archive/mosp-0.2.tar.gz">tar.gz</a>]
+ *  - Source package (v0.7). [<a href="https://github.com/d-michail/mosp/archive/mosp-0.7.tar.gz">tar.gz</a>]
+ *  - Source package (v0.6). [<a href="https://github.com/d-michail/mosp/archive/mosp-0.6.tar.gz">tar.gz</a>]
+ *  - Source package (v0.5). [<a href="https://github.com/d-michail/mosp/archive/mosp-0.5.tar.gz">tar.gz</a>]
+ *  - Source package (v0.3). [<a href="https://github.com/d-michail/mosp/archive/mosp-0.3.tar.gz">tar.gz</a>]
+ *  - Source package (v0.2). [<a href="https://github.com/d-michail/mosp/archive/mosp-0.2.tar.gz">tar.gz</a>]
  *
  *  \section ex_sec Code Examples
  *  \subsection ex_rankmaximal Rank-Maximal Matchings
